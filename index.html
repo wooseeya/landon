@@ -162,7 +162,7 @@
     body.mobile-preview-mode #osViewportFrame .xl\:justify-end { justify-content: space-between !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:inline { display: block !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:text-\[23px\] { font-size: 19px !important; line-height: 1.75rem !important; }
-    body.mobile-preview-mode #osViewportFrame .sm\:grid-cols-6 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    body.mobile-preview-mode #osViewportFrame .sm\:grid-cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
     body.mobile-preview-mode #osViewportFrame .md\:grid-cols-2,
     body.mobile-preview-mode #osViewportFrame .xl\:grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:p-6 { padding: 1.25rem !important; }
@@ -281,7 +281,6 @@
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
         <div class="flex items-center gap-2">
-          <div class="app-logo w-8 h-8 rounded-lg border border-ivory-border shadow-soft shrink-0" role="img" aria-label="랜드온 로고"></div>
           <div>
             <span class="font-bold text-sm tracking-tight text-charcoal">랜드온</span>
             <span class="text-[11.5px] text-brand-orange font-semibold ml-1">PRO</span>
@@ -374,7 +373,7 @@
 
         <button data-nav="clauses" onclick="handleNavClick('clauses', 'card-clauses')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[14.5px] font-medium text-charcoal-muted hover:bg-ivory-subtle hover:text-charcoal transition-colors">
           <i data-lucide="shield-check" class="w-4 h-4"></i>
-          <span>특약·위험진단</span>
+          <span>위험물건 진단</span>
           <span class="ml-auto text-[11.5px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">AI</span>
         </button>
 
@@ -540,9 +539,7 @@
               <button type="button" onclick="runPromptChip('래미안 102동 84A 전세 6.5억 매물 등록해줘')" class="shrink-0 text-[13px] px-2.5 py-1 rounded-full bg-white hover:bg-brand-orangeSoft text-charcoal-muted hover:text-brand-orange border border-ivory-border hover:border-brand-orangeBorder transition-colors">
                 “래미안 102동 84A 전세 6.5억 매물 등록해줘”
               </button>
-              <button type="button" onclick="runPromptChip('전세사기 예방 및 근저당 말소 특약 복사해줘')" class="shrink-0 text-[13px] px-2.5 py-1 rounded-full bg-white hover:bg-brand-orangeSoft text-charcoal-muted hover:text-brand-orange border border-ivory-border hover:border-brand-orangeBorder transition-colors">
-                “전세사기 예방 특약 추천해줘”
-              </button>
+
               <button type="button" onclick="runPromptChip('묵시적 갱신 만기 임차인 안내 문자 만들어줘')" class="shrink-0 text-[13px] px-2.5 py-1 rounded-full bg-white hover:bg-brand-orangeSoft text-charcoal-muted hover:text-brand-orange border border-ivory-border hover:border-brand-orangeBorder transition-colors">
                 “임대차 만기 연장 안내 문자 생성”
               </button>
@@ -604,17 +601,20 @@
             <div class="bg-white rounded-3xl border border-ivory-border p-4 shadow-card">
               <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-bold text-charcoal">💬 랜드온 비서 대화창</span>
+                <span class="flex items-center gap-3">
+                <button type="button" onclick="clearChatAll()" class="text-[12px] font-semibold text-charcoal-light hover:text-rose-600">대화 지우기</button>
                 <button onclick="openVoiceModal()" class="text-xs text-brand-orange font-semibold flex items-center gap-1">
                   <i data-lucide="mic" class="w-3.5 h-3.5"></i> 음성 메모
                 </button>
+                </span>
               </div>
               <div id="mobileInlineChatFeed" class="space-y-2 max-h-60 overflow-y-auto mb-3 text-xs">
                 <div class="p-2.5 rounded-2xl bg-ivory-bg border border-ivory-border text-charcoal">
-                  대표님, 현장 이동 중에도 매물 등록, 특약 복사, 위험물건 진단, 임대차 만기 안내를 바로 실행할 수 있습니다!
+                  대표님, 현장 이동 중에도 매물 등록, 위험물건 진단, 임대차 만기 안내를 바로 실행할 수 있습니다!
                 </div>
               </div>
               <form onsubmit="handleMobileInlineChat(event)" class="flex items-center gap-1.5 bg-ivory-bg border border-ivory-border rounded-xl p-1.5">
-                <input id="mobileInlineChatInput" type="text" placeholder="매물 등록, 특약 추천 등 입력..." class="w-full bg-transparent text-xs px-2 focus:outline-none" />
+                <input id="mobileInlineChatInput" type="text" placeholder="매물 등록, 만기 안내 등 입력..." class="w-full bg-transparent text-xs px-2 focus:outline-none" />
                 <button type="submit" class="px-3 py-1.5 rounded-lg bg-brand-orange text-white text-xs font-semibold shrink-0">전송</button>
               </form>
             </div>
@@ -632,7 +632,7 @@
                   </span>
                   <div>
                     <h3 class="text-[17.5px] font-bold text-charcoal">오늘 브리핑</h3>
-                    <p class="text-xs text-charcoal-muted">일정 · 계약·잔금 · 매물 · 특약·만기 · 중개보수 목표 1줄 요약</p>
+                    <p class="text-xs text-charcoal-muted">일정 · 계약·잔금 · 매물 · 임대차 만기 · 중개보수 목표 1줄 요약</p>
                   </div>
                 </div>
                 <span class="text-[12.5px] font-medium text-charcoal-light bg-ivory-subtle px-2.5 py-1 rounded-full">실시간 중개 현황</span>
@@ -670,7 +670,7 @@
                 <div class="py-2.5 flex items-center justify-between gap-2 px-1.5 rounded-xl hover:bg-ivory-hover/60 transition-colors">
                   <div class="flex items-center gap-2.5 min-w-0">
                     <span class="text-base shrink-0">🛡️</span>
-                    <span class="text-xs font-bold text-charcoal w-16 shrink-0">특약·만기</span>
+                    <span class="text-xs font-bold text-charcoal w-16 shrink-0">임대차 만기</span>
                     <span id="briefing-lease" class="text-[14.5px] text-charcoal truncate">임대차 3법 갱신청구권 만기 도래 <strong class="text-brand-orange font-bold">2건</strong> · 위험진단 대기 <strong class="font-bold">1건</strong></span>
                   </div>
                   <button onclick="scrollToCard('card-lease')" class="text-[12.5px] text-charcoal-light hover:text-brand-orange shrink-0">보기 →</button>
@@ -721,10 +721,10 @@
             <section class="bg-white rounded-3xl border border-ivory-border p-5 shadow-card">
               <div class="flex items-center justify-between mb-3.5">
                 <h3 class="text-[16.5px] font-bold text-charcoal">빠른 실행</h3>
-                <span class="text-[12.5px] text-charcoal-light">현장 즉시 기록 · 특약·진단·안내 생성</span>
+                <span class="text-[12.5px] text-charcoal-light">현장 즉시 기록 · 진단·안내 생성</span>
               </div>
 
-              <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 mb-4">
+              <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-4">
                 <button onclick="openQuickModal('listing')" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
                   <div class="w-12 h-12 rounded-full bg-brand-orangeSoft group-hover:bg-brand-orange text-brand-orange group-hover:text-white border border-brand-orangeBorder flex items-center justify-center transition-colors shadow-soft">
                     <i data-lucide="home" class="w-5 h-5"></i>
@@ -737,13 +737,6 @@
                     <i data-lucide="calendar-plus" class="w-5 h-5"></i>
                   </div>
                   <span class="text-xs font-semibold text-charcoal">투어 일정</span>
-                </button>
-
-                <button onclick="copyClause('jeonseSafe'); scrollToCard('card-clauses');" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
-                  <div class="w-12 h-12 rounded-full bg-ivory-subtle group-hover:bg-charcoal text-charcoal group-hover:text-white border border-ivory-border flex items-center justify-center transition-colors shadow-soft">
-                    <i data-lucide="file-check-2" class="w-5 h-5"></i>
-                  </div>
-                  <span class="text-xs font-semibold text-charcoal">특약 복사</span>
                 </button>
 
                 <button onclick="scrollToCard('card-clauses'); document.getElementById('riskDepositInput').focus();" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
@@ -768,20 +761,6 @@
                 </button>
               </div>
 
-              <!-- 자연어 명령 강조 배너 -->
-              <div class="p-3 rounded-2xl bg-brand-orangeSoft/80 border border-brand-orangeBorder flex items-center justify-between gap-2.5">
-                <div class="flex items-center gap-2 min-w-0">
-                  <span class="w-6 h-6 rounded-lg bg-brand-orange text-white flex items-center justify-center shrink-0">
-                    <i data-lucide="message-square-text" class="w-3.5 h-3.5"></i>
-                  </span>
-                  <p class="text-xs text-charcoal truncate">
-                    <strong class="text-brand-orange font-bold">자연어 실무 명령:</strong> “래미안 102동 84A 전세 6.5억 매물 등록해줘”처럼 입력하면 장부와 브리핑이 즉시 동기화됩니다.
-                  </p>
-                </div>
-                <button onclick="document.getElementById('topCommandInput').focus()" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-orange hover:text-white text-brand-orange border border-brand-orangeBorder text-[12.5px] font-bold shrink-0 transition-colors">
-                  명령 입력
-                </button>
-              </div>
             </section>
 
             <!-- ③ 중개 실무 8대 카드 그리드 (데스크톱 2열 / 모바일 1열) -->
@@ -800,7 +779,7 @@
                   </div>
 
                   <!-- 유형별 매물 카운트 -->
-                  <div class="grid grid-cols-4 gap-1.5 text-center my-2">
+                  <div class="grid grid-cols-3 gap-1.5 text-center my-2">
                     <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
                       <p class="text-[12px] text-charcoal-muted">매매</p>
                       <p id="countSale" class="text-sm font-extrabold text-charcoal mt-0.5">14</p>
@@ -813,10 +792,7 @@
                       <p class="text-[12px] text-charcoal-muted">월세</p>
                       <p id="countMonthly" class="text-sm font-extrabold text-charcoal mt-0.5">23</p>
                     </div>
-                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
-                      <p class="text-[12px] text-charcoal-muted">상가·토지</p>
-                      <p id="countCommercial" class="text-sm font-extrabold text-charcoal mt-0.5">6</p>
-                    </div>
+                  </div>
                   </div>
 
                   <!-- 항목은 저장된 데이터로 그림 (renderListings) — 위 유형별 건수도 이 목록으로 계산 -->
@@ -831,7 +807,7 @@
                 </div>
               </article>
 
-              <!-- (2) 계약 및 잔금 D-Day 관리 -->
+              <!-- (2) 계약 및 잔금 관리 -->
               <article id="card-contracts" class="bg-white rounded-3xl border border-ivory-border p-5 shadow-card flex flex-col justify-between transition-all">
                 <div>
                   <div class="flex items-center justify-between mb-3">
@@ -839,7 +815,7 @@
                       <span class="w-8 h-8 rounded-xl bg-brand-orangeSoft text-brand-orange flex items-center justify-center">
                         <i data-lucide="file-signature" class="w-4 h-4"></i>
                       </span>
-                      <h4 class="font-bold text-[16.5px] text-charcoal">계약 및 잔금 D-Day 관리</h4>
+                      <h4 class="font-bold text-[16.5px] text-charcoal">계약 및 잔금 관리</h4>
                     </div>
                     <span id="contractBadge" class="text-[12.5px] font-bold px-2.5 py-0.5 rounded-full bg-brand-orangeSoft text-brand-orange">잔금 임박</span>
                   </div>
@@ -907,7 +883,7 @@
                 </div>
               </article>
 
-              <!-- (5) 임대차 3법 만기 알림 자동화 -->
+              <!-- (5) 임대차 만기 알림 -->
               <article id="card-lease" class="bg-white rounded-3xl border border-ivory-border p-5 shadow-card flex flex-col justify-between transition-all">
                 <div>
                   <div class="flex items-center justify-between mb-3">
@@ -915,7 +891,7 @@
                       <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                         <i data-lucide="bell-ring" class="w-4 h-4"></i>
                       </span>
-                      <h4 class="font-bold text-[16.5px] text-charcoal">임대차 3법 만기 알림 자동화</h4>
+                      <h4 class="font-bold text-[16.5px] text-charcoal">임대차 만기 알림</h4>
                     </div>
                     <span id="leaseBadge" class="text-[12.5px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800">갱신 구간 0건</span>
                   </div>
@@ -934,7 +910,7 @@
                 </div>
               </article>
 
-              <!-- (6) 특약사항 라이브러리 & 위험물건 자동 진단 -->
+              <!-- (6) 위험물건 자동 진단 -->
               <article id="card-clauses" class="bg-white rounded-3xl border border-ivory-border p-5 shadow-card flex flex-col justify-between transition-all">
                 <div>
                   <div class="flex items-center justify-between mb-3">
@@ -942,17 +918,10 @@
                       <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
                       </span>
-                      <h4 class="font-bold text-[16.5px] text-charcoal">특약 라이브러리 & 위험물건 진단</h4>
+                      <h4 class="font-bold text-[16.5px] text-charcoal">위험물건 진단</h4>
                     </div>
                     <span class="text-[12.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">안전 계약 AI</span>
                   </div>
-
-                  <!-- 특약 라이브러리 (renderClauses) — 복사 · 수정 · 삭제 -->
-                  <div class="flex items-center justify-between mb-1.5">
-                    <p class="text-[12.5px] font-bold text-charcoal">📚 내 특약 라이브러리</p>
-                    <button onclick="openItemForm('clauses')" class="px-2 py-0.5 rounded-full bg-ivory-subtle hover:bg-charcoal hover:text-white text-charcoal text-[12.5px] font-semibold transition-colors">+ 특약 추가</button>
-                  </div>
-                  <div id="clauseList" class="space-y-1.5 mb-3"></div>
 
                   <!-- 위험물건 즉시 진단기 -->
                   <div class="p-3 rounded-2xl bg-ivory-subtle/80 border border-ivory-border space-y-2">
@@ -969,7 +938,7 @@
                 </div>
 
                 <div class="mt-3 pt-2.5 border-t border-ivory-border flex items-center justify-between">
-                  <span id="clauseCountText" class="text-[12.5px] text-charcoal-light">특약 0종 저장됨</span>
+                  <span class="text-[12.5px] text-charcoal-light">시세 대비 보증금·선순위 채권 비율 점검</span>
                   <button onclick="runRiskDiagnosis()" class="px-3.5 py-2 rounded-xl bg-charcoal hover:bg-black text-white text-xs font-semibold transition-colors">
                     위험도 즉시 진단 실행
                   </button>
@@ -1091,23 +1060,21 @@
             </span>
             <h3 class="text-sm font-bold text-charcoal">랜드온 비서 대화창</h3>
           </div>
-          <span class="text-[12.5px] text-emerald-600 font-semibold">중개 AI 활성</span>
+          <span class="flex items-center gap-2"><button type="button" onclick="clearChatAll()" class="text-[12px] font-semibold text-charcoal-light hover:text-rose-600">대화 지우기</button><span class="text-[12.5px] text-emerald-600 font-semibold">중개 AI 활성</span></span>
         </div>
 
         <div id="chatMessages" class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 mb-3 text-xs">
           <div class="flex gap-2">
             <div class="w-6 h-6 rounded-full bg-brand-orangeSoft text-brand-orange flex items-center justify-center shrink-0 font-bold text-[11.5px]">AI</div>
             <div class="bg-ivory-bg border border-ivory-border/70 rounded-2xl rounded-tl-sm p-2.5 text-charcoal leading-relaxed">
-              <span data-agent="name">홍길동</span> 대표님, 오늘의 투어 일정과 계약 체크리스트, 임대차 만기 알림을 정리해 두었습니다. 매물 등록이나 특약 복사가 필요하시면 바로 말씀해 주세요!
+              <span data-agent="name">홍길동</span> 대표님, 오늘의 투어 일정과 계약 체크리스트, 임대차 만기 알림을 정리해 두었습니다. 매물 등록이나 위험물건 진단이 필요하시면 바로 말씀해 주세요!
             </div>
           </div>
         </div>
 
         <!-- 공인중개사 전용 Quick Action 칩 -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar">
-          <button type="button" onclick="copyClause('jeonseSafe')" class="shrink-0 text-[12.5px] px-2.5 py-1 rounded-full bg-brand-orangeSoft text-brand-orange hover:bg-blue-100 font-semibold transition-colors">
-            전세안심 특약 복사
-          </button>
+
           <button type="button" onclick="sendChatMessage('급전세 매물 홍보글 작성해줘')" class="shrink-0 text-[12.5px] px-2.5 py-1 rounded-full bg-ivory-subtle text-charcoal-muted hover:text-charcoal font-semibold transition-colors">
             홍보글 작성
           </button>
@@ -1126,7 +1093,7 @@
           <input 
             id="chatInput"
             type="text" 
-            placeholder="특약 추천, 매물 등록, 만기 안내..." 
+            placeholder="매물 등록, 위험 진단, 만기 안내..." 
             class="w-full bg-transparent text-xs text-charcoal placeholder:text-charcoal-light focus:outline-none"
             autocomplete="off"
           />
@@ -1164,10 +1131,7 @@
         </div>
 
         <div id="historyList" class="divide-y divide-ivory-border/60 text-xs">
-          <button onclick="copyClause('jeonseSafe')" class="w-full py-2 text-left hover:bg-ivory-bg px-2 rounded-lg transition-colors flex items-center justify-between gap-2">
-            <span class="text-charcoal truncate">전세사기 예방 반환 특약 문구 복사</span>
-            <span class="text-[11.5px] text-charcoal-light shrink-0">오늘</span>
-          </button>
+
           <button onclick="sendChatMessage('한남더힐 84㎡ 급전세 홍보글 다시 불러와줘')" class="w-full py-2 text-left hover:bg-ivory-bg px-2 rounded-lg transition-colors flex items-center justify-between gap-2">
             <span class="text-charcoal truncate">한남더힐 84㎡ 네이버 블로그 홍보글 작성</span>
             <span class="text-[11.5px] text-charcoal-light shrink-0">어제</span>
@@ -1196,7 +1160,7 @@
       </button>
       <button onclick="switchMobileMainTab('home'); scrollToCard('card-clauses');" class="flex flex-col items-center gap-0.5 py-1 px-3 text-charcoal-muted hover:text-charcoal">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
-        <span class="text-[11.5px] font-semibold">특약·진단</span>
+        <span class="text-[11.5px] font-semibold">위험진단</span>
       </button>
       <button onclick="openMobileSidebar()" class="flex flex-col items-center gap-0.5 py-1 px-3 text-charcoal-muted hover:text-charcoal">
         <i data-lucide="grid" class="w-4 h-4"></i>
@@ -1216,22 +1180,25 @@
             </span>
             <div>
               <h4 class="text-sm font-bold text-charcoal">랜드온 비서</h4>
-              <p class="text-[12.5px] text-charcoal-muted">매물 등록 · 특약 복사 · 만기 안내 즉시 실행</p>
+              <p class="text-[12.5px] text-charcoal-muted">매물 등록 · 위험 진단 · 만기 안내 즉시 실행</p>
             </div>
           </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" onclick="clearChatAll()" class="px-2.5 py-1.5 rounded-xl bg-ivory-subtle text-charcoal-muted hover:text-rose-600 text-[12px] font-semibold whitespace-nowrap shrink-0">대화 지우기</button>
           <button onclick="closeMobileAiSheet()" class="p-1.5 rounded-xl bg-ivory-subtle text-charcoal">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
+          </div>
         </div>
 
         <div id="sheetChatMessages" class="flex-1 overflow-y-auto space-y-2.5 p-2.5 rounded-2xl bg-ivory-bg border border-ivory-border min-h-[160px] max-h-[260px] text-xs">
           <div class="bg-white border border-ivory-border rounded-2xl p-2.5 text-charcoal leading-relaxed">
-            안녕하세요 대표님! 현장 이동 중에도 “래미안 102동 전세 6.5억 매물 등록해줘” 또는 “전세사기 예방 특약 추천”을 바로 실행할 수 있습니다.
+            안녕하세요 대표님! 현장 이동 중에도 “래미안 102동 전세 6.5억 매물 등록해줘” 또는 “위험물건 진단”을 바로 실행할 수 있습니다.
           </div>
         </div>
 
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          <button onclick="copyClause('jeonseSafe')" class="shrink-0 text-[12.5px] px-2.5 py-1 rounded-full bg-brand-orangeSoft text-brand-orange font-semibold">전세안심 특약 복사</button>
+
           <button onclick="sendSheetChat('급전세 매물 홍보글 작성해줘')" class="shrink-0 text-[12.5px] px-2.5 py-1 rounded-full bg-ivory-subtle text-charcoal font-semibold">홍보글 작성</button>
           <button onclick="copyLeaseNotice('정민호', '임차인')" class="shrink-0 text-[12.5px] px-2.5 py-1 rounded-full bg-ivory-subtle text-charcoal font-semibold">만기 연장 문자 복사</button>
         </div>
@@ -1315,7 +1282,7 @@
             <i data-lucide="mic" class="w-6 h-6"></i>
           </button>
           <p id="voiceStatus" class="text-sm font-bold text-charcoal">마이크를 눌러 말씀하세요</p>
-          <p id="voiceHint" class="text-[12.5px] text-charcoal-muted mt-0.5">운전·임장 중 음성으로 매물·일정·특약을 즉시 처리합니다</p>
+          <p id="voiceHint" class="text-[12.5px] text-charcoal-muted mt-0.5">운전·임장 중 음성으로 매물·일정을 즉시 처리합니다</p>
         </div>
 
         <!-- 인식된 문장 (고쳐 쓸 수 있음) -->
@@ -1339,7 +1306,7 @@
       </div>
     </div>
 
-    <!-- ==================== 모달: 공용 입력창 (계약·임대차·특약·중개보수·마케팅 등록/수정) ==================== -->
+    <!-- ==================== 모달: 공용 입력창 (계약·임대차·중개보수·마케팅 등록/수정) ==================== -->
     <div id="modal-form" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] p-4">
       <div class="bg-white rounded-3xl border border-ivory-border w-full max-w-sm p-5 shadow-xl max-h-full overflow-y-auto">
         <div class="flex items-center justify-between mb-3">
@@ -1506,11 +1473,6 @@
           { id: 'seed-e1', tenant: '정민호', place: '한남더힐 103동', terms: '전세 7.5억', endDate: '2027-01-23' },
           { id: 'seed-e2', tenant: '오세훈', place: '성수 트리마제 102동', terms: '월세 1억/280', endDate: '2027-03-18' }
         ],
-        clauses: [
-          { id: 'jeonseSafe', title: '🛡️ 전세사기 예방 · 전세대출/보증보험 반환 특약', text: '[전세안심 특약] 임차인의 전세자금대출 실행 및 전세보증금반환보증 가입이 임대인 또는 목적물 권리·건축물 하자로 불가할 경우, 본 계약은 무효로 하고 임대인은 수령한 계약금 전액을 즉시 반환한다. 또한 잔금 지급일 익일까지 임차인의 대항력 발생 전 추가 근저당권 등 권리변동을 발생시키지 않는다.' },
-          { id: 'mortgage', title: '🏦 잔금일 당일 선순위 근저당 말소 조건 특약', text: '[근저당 말소 특약] 현 등기부등본상 선순위 근저당권(채권최고액 금 OOO원)은 잔금 지급과 동시에 전액 상환 및 말소 접수하기로 하며, 임대인은 잔금 수령 즉시 영수증과 말소 접수증을 임차인에게 교부한다. 불이행 시 본 계약은 해제되며 임대인은 계약금 배액을 배상한다.' },
-          { id: 'restoration', title: '🔧 시설물 파손 · 퇴거 시 원상복구 범위 특약', text: '[시설물 및 원상복구 특약] 현 시설물 상태의 임대차 계약이며, 입주 전 확인된 노후 및 자연 마모로 인한 수선은 임대인이 부담하고 임차인의 고의·과실로 인한 파손에 한해 퇴거 시 원상복구하기로 한다.' }
-        ],
         fees: [
           { id: 'seed-f1', title: '마포 래미안푸르지오 · 매매', amount: 690, status: 'paid' },
           { id: 'seed-f2', title: '잠실 리센츠 · 전세', amount: 360, status: 'paid' },
@@ -1525,7 +1487,7 @@
         }
       };
     }
-    const LIST_KEYS = ['listings', 'tours', 'clients', 'reminders', 'contracts', 'leases', 'clauses', 'fees'];
+    const LIST_KEYS = ['listings', 'tours', 'clients', 'reminders', 'contracts', 'leases', 'fees'];
     const EMPTY_DATA = () => Object.assign({ v: DATA_VERSION, chat: [], checks: {}, notifCleared: false }, seedItems());
 
     // 저장 형식 맞추기 (예전 버전: 샘플은 화면에 고정 + 추가한 기록만 records 에 저장)
@@ -2032,13 +1994,7 @@
       if (ok) { setMicBtnState(btn, true); input.placeholder = '듣고 있어요… 말씀하세요'; }
     }
 
-    // ==================== 특약 복사 & 위험물건 자동 진단 ====================
-    // 특약 복사: 저장된 특약 라이브러리에서 찾음 (없으면 첫 번째 특약)
-    function copyClause(id) {
-      const c = findItem('clauses', id) || userData.clauses[0];
-      if (!c) { showToast('저장된 특약이 없습니다. + 특약 추가로 먼저 등록해 주세요.'); return; }
-      copyTextToClipboard(c.text, `'${escapeHtml(c.title)}' 특약 문구가 클립보드에 복사되었습니다.`);
-    }
+    // ==================== 위험물건 자동 진단 ====================
 
     function runRiskDiagnosis() {
       const market = parseFloat(document.getElementById('riskMarketInput').value) || 0;
@@ -2087,7 +2043,7 @@
 
     // ==================== 실시간 중개 데이터 연동 (매물 등록 / 투어 추가 / 마케팅 생성) ====================
     // ---------- 카드 항목 그리기 ----------
-    const KIND_LABEL = { listings: '매물', tours: '투어 일정', clients: '고객', reminders: '리마인드', contracts: '계약', leases: '임대차', clauses: '특약', fees: '중개보수' };
+    const KIND_LABEL = { listings: '매물', tours: '투어 일정', clients: '고객', reminders: '리마인드', contracts: '계약', leases: '임대차', fees: '중개보수' };
     function findItem(kind, id) { return (userData[kind] || []).find(x => String(x.id) === String(id)); }
     function itemActions(kind, id) {
       const a = `data-kind="${kind}" data-id="${escapeHtml(id)}"`;
@@ -2103,8 +2059,8 @@
       const d = String(deal || '');
       if (d.includes('매매')) return 'sale';
       if (d.includes('월세')) return 'monthly';
-      if (d.includes('상가') || d.includes('토지')) return 'commercial';
-      return 'jeonse';
+      if (d.includes('전세')) return 'jeonse';
+      return 'commercial'; // 상가·토지 등 그 밖의 매물: 총 보유 건수에만 포함
     }
 
     function renderListings() {
@@ -2115,10 +2071,9 @@
       document.getElementById('countSale').textContent = counts.sale;
       document.getElementById('countJeonse').textContent = counts.jeonse;
       document.getElementById('countMonthly').textContent = counts.monthly;
-      document.getElementById('countCommercial').textContent = counts.commercial;
       document.getElementById('listingTotalBadge').textContent = `총 보유 ${total}건`;
       document.getElementById('navListingCount').textContent = total;
-      document.getElementById('listingFooterText').textContent = `매매 ${counts.sale} · 전세 ${counts.jeonse} · 월세 ${counts.monthly} · 상가·토지 ${counts.commercial}`;
+      document.getElementById('listingFooterText').textContent = `매매 ${counts.sale} · 전세 ${counts.jeonse} · 월세 ${counts.monthly}`;
       document.getElementById('briefing-listings').innerHTML = total
         ? `보유 매물 <strong class="font-bold">${total}건</strong> · 최근 등록 <strong class="font-bold">${escapeHtml(userData.listings[0].title)}</strong>`
         : '등록된 매물이 없습니다';
@@ -2317,20 +2272,6 @@
         : emptyRow('관리 중인 임대차가 없습니다. + 임대차 등록을 눌러 추가하세요.');
     }
 
-    // ---------- 특약 라이브러리 ----------
-    function renderClauses() {
-      document.getElementById('clauseCountText').textContent = `특약 ${userData.clauses.length}종 저장됨`;
-      document.getElementById('clauseList').innerHTML = userData.clauses.length
-        ? userData.clauses.map(c => `
-          <div class="flex items-center justify-between gap-1.5 p-2 rounded-xl bg-ivory-bg border border-ivory-border/70 text-xs">
-            <span class="font-semibold text-charcoal truncate min-w-0" title="${escapeHtml(c.text)}">${escapeHtml(c.title)}</span>
-            <div class="flex items-center gap-1 shrink-0">
-              <button data-id="${escapeHtml(c.id)}" onclick="copyClause(this.dataset.id)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-brand-orange hover:text-white text-brand-orange border border-brand-orangeBorder text-[12.5px] font-bold transition-colors">복사</button>
-              ${itemActions('clauses', c.id)}
-            </div>
-          </div>`).join('')
-        : emptyRow('저장된 특약이 없습니다. + 특약 추가로 자주 쓰는 문구를 저장하세요.');
-    }
 
     // ---------- 중개보수 ----------
     function feeTotals() {
@@ -2377,7 +2318,7 @@
       });
     }
 
-    // ---------- 등록 · 수정 공용 입력창 (계약·임대차·특약·중개보수) ----------
+    // ---------- 등록 · 수정 공용 입력창 (계약·임대차·중개보수) ----------
     const FORM_SCHEMAS = {
       contracts: {
         addTitle: '📑 계약 등록', editTitle: '✏️ 계약 수정',
@@ -2403,13 +2344,6 @@
           { key: 'place', label: '물건 (단지 · 동호수)', placeholder: '예: 한남더힐 103동' },
           { key: 'terms', label: '계약 조건', placeholder: '예: 전세 7.5억 / 월세 1억/280' },
           { key: 'endDate', label: '계약 만기일', type: 'date', required: true }
-        ]
-      },
-      clauses: {
-        addTitle: '📚 특약 추가', editTitle: '✏️ 특약 수정',
-        fields: [
-          { key: 'title', label: '특약 이름', placeholder: '예: 🐶 반려동물 관련 특약', required: true },
-          { key: 'text', label: '특약 문구', type: 'textarea', rows: 6, required: true }
         ]
       },
       fees: {
@@ -2438,7 +2372,7 @@
           saveData();
           refreshKind(kind);
           showToast(old ? `✏️ ${KIND_LABEL[kind]} 항목을 수정했습니다.` : `✅ ${KIND_LABEL[kind]} 항목을 등록했습니다.`);
-          if (!old) scrollToCard({ contracts: 'card-contracts', leases: 'card-lease', clauses: 'card-clauses', fees: 'card-settlement' }[kind]);
+          if (!old) scrollToCard({ contracts: 'card-contracts', leases: 'card-lease', fees: 'card-settlement' }[kind]);
         }
       });
     }
@@ -2483,7 +2417,6 @@
       renderTours();
       renderClients();
       renderLeases();
-      renderClauses();
       renderFees();
       renderReminders();
       renderMarketing();
@@ -2492,7 +2425,7 @@
     }
     function refreshKind(kind) {
       ({ listings: renderListings, tours: renderTours, clients: renderClients, reminders: renderReminders,
-         contracts: renderContracts, leases: renderLeases, clauses: renderClauses, fees: renderFees })[kind]();
+         contracts: renderContracts, leases: renderLeases, fees: renderFees })[kind]();
       if (kind === 'tours') renderClients(); // '오늘 투어 N명' 갱신
       renderOverview();
       if (window.lucide) lucide.createIcons();
@@ -2830,7 +2763,7 @@
 
     // 수정 창: 빠른 입력 모달을 '수정' 모드로 사용
     const EDIT_FIELDS = {
-      listings: { title: '✏️ 매물 수정', f1: ['단지명 · 동/타입', 'title'], f2: ['거래유형 · 금액', 'deal'], f3: ['메모', 'note'] },
+      listings: { title: '✏️ 매물 수정', f1: ['매물명 · 위치 (주택·상가·토지 등)', 'title'], f2: ['거래유형 · 금액', 'deal'], f3: ['메모', 'note'] },
       tours: { title: '✏️ 투어 일정 수정', f1: ['고객명 · 방문 단지', 'title'], f2: ['방문 시간 (예: 15:30)', 'time'], f3: ['메모', 'note'] },
       clients: { title: '✏️ 고객 정보 수정', f1: ['고객 성함 · 연락처', 'name'], f2: ['희망 조건 · 예산', 'cond'], f3: ['상담 메모', 'note'] },
       reminders: { title: '✏️ 리마인드 수정', f1: ['할 일', 'text'], f2: null, f3: ['세부 내용', 'sub'] }
@@ -2952,31 +2885,80 @@
     }
 
     // ==================== AI 온비서 대화 통합 엔진 ====================
-    function appendAllChatFeeds(sender, htmlText) {
-      if (!restoring) {
-        userData.chat.push({ s: sender, h: htmlText });
-        saveData();
+    // 대화 기록: 말풍선마다 [수정](내가 보낸 글만) · [삭제]. 화면 3곳(PC 대화창 · 온비서 시트 · 모바일 대화창)이 같은 기록을 그림
+    const CHAT_FEEDS = ['chatMessages', 'sheetChatMessages', 'mobileInlineChatFeed'];
+    let editingChatId = null;
+    function newChatId() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    const chatBtn = 'text-[11.5px] font-semibold text-charcoal-light hover:text-brand-orange px-1 py-0.5';
+    function chatRowHtml(m) {
+      const id = escapeHtml(m.id);
+      if (m.s === 'user' && editingChatId === m.id) {
+        return `<div class="flex justify-end"><div class="w-[88%] space-y-1.5">
+            <textarea data-edit="${id}" rows="2" class="w-full px-3 py-2 rounded-xl bg-white border border-brand-orange text-xs text-charcoal focus:outline-none resize-none">${m.h}</textarea>
+            <div class="flex justify-end gap-1.5">
+              <button type="button" onclick="cancelChatEdit()" class="px-3 py-1 rounded-lg bg-ivory-subtle text-charcoal text-[12px] font-semibold">취소</button>
+              <button type="button" data-id="${id}" onclick="saveChatEdit(this)" class="px-3 py-1 rounded-lg bg-brand-orange text-white text-[12px] font-semibold">저장</button>
+            </div></div></div>`;
       }
-      const feeds = ['chatMessages', 'sheetChatMessages', 'mobileInlineChatFeed'];
-      feeds.forEach(feedId => {
+      const del = `<button type="button" data-id="${id}" onclick="deleteChatMessage(this.dataset.id)" class="${chatBtn} hover:!text-rose-600">삭제</button>`;
+      if (m.s === 'user') {
+        return `<div class="flex justify-end items-end gap-1">
+            <span class="flex shrink-0"><button type="button" data-id="${id}" onclick="startChatEdit(this.dataset.id)" class="${chatBtn}">수정</button>${del}</span>
+            <div class="bg-brand-orange text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[75%] leading-relaxed break-words">${m.h}</div></div>`;
+      }
+      return `<div class="flex gap-2 items-end">
+          <div class="w-5 h-5 rounded-full bg-brand-orangeSoft text-brand-orange flex items-center justify-center shrink-0 font-bold text-[11.5px] mt-0.5 self-start">AI</div>
+          <div class="bg-white border border-ivory-border rounded-2xl rounded-tl-sm p-2.5 text-charcoal max-w-[78%] leading-relaxed break-words">${m.h}</div>
+          <span class="shrink-0">${del}</span></div>`;
+    }
+    function renderChatFeeds() {
+      CHAT_FEEDS.forEach(feedId => {
         const box = document.getElementById(feedId);
         if (!box) return;
-        const div = document.createElement('div');
-        if (sender === 'user') {
-          div.className = 'flex justify-end';
-          div.innerHTML = `<div class="bg-brand-orange text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[85%] leading-relaxed">${htmlText}</div>`;
-        } else {
-          div.className = 'flex gap-2';
-          div.innerHTML = `
-            <div class="w-5 h-5 rounded-full bg-brand-orangeSoft text-brand-orange flex items-center justify-center shrink-0 font-bold text-[11.5px] mt-0.5">AI</div>
-            <div class="bg-white border border-ivory-border rounded-2xl rounded-tl-sm p-2.5 text-charcoal max-w-[88%] leading-relaxed">${htmlText}</div>
-          `;
-        }
-        box.appendChild(div);
+        box.querySelectorAll('[data-chat-id]').forEach(el => el.remove());
+        userData.chat.forEach(m => {
+          const wrap = document.createElement('div');
+          wrap.dataset.chatId = m.id;
+          wrap.innerHTML = chatRowHtml(m);
+          box.appendChild(wrap);
+        });
         box.scrollTop = box.scrollHeight;
       });
     }
-
+    function appendAllChatFeeds(sender, htmlText) {
+      if (restoring) return; // 불러올 때는 renderChatFeeds 가 한 번에 그림
+      userData.chat.push({ id: newChatId(), s: sender === 'user' ? 'user' : 'ai', h: htmlText });
+      saveData();
+      renderChatFeeds();
+    }
+    function startChatEdit(id) { editingChatId = id; renderChatFeeds(); const ta = document.querySelector(`textarea[data-edit="${id}"]`); if (ta) ta.focus(); }
+    function cancelChatEdit() { editingChatId = null; renderChatFeeds(); }
+    function saveChatEdit(btn) {
+      const ta = btn.closest('[data-chat-id]').querySelector('textarea');
+      const v = ta.value.trim();
+      if (!v) { showToast('내용을 입력하거나, 지우려면 삭제를 눌러 주세요.'); return; }
+      const m = userData.chat.find(x => x.id === btn.dataset.id);
+      if (m) { m.h = escapeHtml(v); saveData(); }
+      editingChatId = null;
+      renderChatFeeds();
+      showToast('✏️ 메시지를 수정했습니다.');
+    }
+    function deleteChatMessage(id) {
+      if (!confirm('이 메시지를 삭제할까요?')) return;
+      userData.chat = userData.chat.filter(m => m.id !== id);
+      if (editingChatId === id) editingChatId = null;
+      saveData();
+      renderChatFeeds();
+    }
+    function clearChatAll() {
+      if (!userData.chat.length) { showToast('지울 대화가 없습니다.'); return; }
+      if (!confirm(`대화 ${userData.chat.length}개를 모두 삭제할까요? 되돌릴 수 없습니다.`)) return;
+      userData.chat = [];
+      editingChatId = null;
+      saveData();
+      renderChatFeeds();
+      showToast('🗑️ 대화를 모두 지웠습니다.');
+    }
     function handleTopCommand(e) {
       e.preventDefault();
       const input = document.getElementById('topCommandInput');
@@ -3034,7 +3016,7 @@
 
         if (text.includes('매물') && (text.includes('등록') || text.includes('전세') || text.includes('매매') || text.includes('월세'))) {
           const dealMatch = text.match(/(전세|매매|월세)\s*([0-9.,/억만원]+)/);
-          const dealStr = dealMatch ? dealMatch[0] : '전세 6.5억';
+          const dealStr = dealMatch ? dealMatch[0] : '금액 협의';
           const propTitle = text.replace(dealStr, '').replace(/(매물|등록해줘|등록|추가해줘)/g, '').trim() || '래미안 102동 84A';
           addListingRecord(propTitle, dealStr);
           reply = `🏠 <strong>${escapeHtml(propTitle)} (${escapeHtml(dealStr)})</strong> 매물을 장부에 즉시 등록했습니다. 현재 희망 조건이 일치하는 <strong>박지훈 고객</strong>에게 자동 매칭 알림을 띄웠습니다.`;
@@ -3046,9 +3028,9 @@
           const tourTitle = text.replace(/(오늘|내일|오전|오후|[0-9]{1,2}시|투어|일정|추가해줘)/g, '').trim() || '고객 현장 투어';
           addTourRecord(timeStr, tourTitle, '고객 안내 및 공동현관 출입 정보 연동');
           reply = `🗓️ <strong>${timeStr} ${escapeHtml(tourTitle)}</strong> 현장 투어 일정을 캘린더에 등록했습니다.`;
-        } else if (text.includes('특약')) {
+        } else if (text.includes('위험') || text.includes('진단')) {
           scrollToCard('card-clauses');
-          reply = `🛡️ <strong>[전세사기 예방 및 근저당 말소 특약]</strong><br/>“임차인의 전세자금대출 및 전세보증보험 가입이 임대인 또는 목적물 하자로 불가할 경우 계약은 무효로 하고 계약금 전액을 즉시 반환하며, 잔금일 익일까지 추가 근저당 설정을 금지한다.”<br/>(상단 <strong>특약 라이브러리</strong> 카드에서 원클릭 복사 가능합니다)`;
+          reply = `🛡️ <strong>[위험물건 진단]</strong><br/>위험물건 진단 카드에 시세·선순위 채권·보증금을 입력하고 <strong>위험도 즉시 진단 실행</strong>을 눌러 주세요.`;
         } else if (text.includes('만기') || text.includes('갱신') || text.includes('임대차')) {
           scrollToCard('card-lease');
           const leases = userData.leases.slice().sort((a, b) => String(a.endDate).localeCompare(String(b.endDate)));
@@ -3117,10 +3099,10 @@
       } else if (type === 'listing') {
         f3Input.placeholder = '예: 남향 · 즉시입주 · 융자 없음';
         titleEl.textContent = '🏠 신규 매물 빠른 등록';
-        f1Label.textContent = '단지명 · 동/타입';
-        f1Input.placeholder = '래미안 102동 84A';
+        f1Label.textContent = '매물명 · 위치 (주택·상가·토지 등)';
+        f1Input.placeholder = '래미안 102동 84A / 역삼동 1층 상가 / 양평 토지 300평';
         f2Label.textContent = '거래유형 · 금액';
-        f2Input.placeholder = '전세 6.5억';
+        f2Input.placeholder = '전세 6.5억 · 매매 12억 · 월세 보 5천/월 300';
       } else if (type === 'tour') {
         titleEl.textContent = '🗓️ 현장 투어 일정 추가';
         f1Label.textContent = '고객명 · 방문 단지';
@@ -3137,8 +3119,8 @@
         f2Input.placeholder = '아파트 매매 15억대 · 남향 30평형';
       } else if (type === 'memorySearch') {
         titleEl.textContent = '🔍 중개 기억 · 고객/매물 이력 검색';
-        f1Label.textContent = '고객명, 단지명 또는 특약 키워드';
-        f1Input.placeholder = '예: 정민호 만기 / 한남더힐 비번 / 근저당 특약';
+        f1Label.textContent = '고객명 또는 단지명 키워드';
+        f1Input.placeholder = '예: 정민호 만기 / 한남더힐 비번';
         f2Label.textContent = '검색 범위 (전체 / 계약서 / 상담메모)';
         f2Input.placeholder = '전체';
         submitBtn.textContent = '즉시 검색';
@@ -3176,8 +3158,8 @@
         addReminderItem(v1, v3 || '직접 추가한 리마인드');
         closeQuickModal();
       } else if (type === 'listing') {
-        addListingRecord(v1, v2 || '전세 6.5억', v3);
-        appendAllChatFeeds('ai', `🏠 <strong>${escapeHtml(v1)} (${escapeHtml(v2 || '전세 6.5억')})</strong> 신규 매물을 장부에 등록했습니다.`);
+        addListingRecord(v1, v2 || '금액 협의', v3);
+        appendAllChatFeeds('ai', `🏠 <strong>${escapeHtml(v1)} (${escapeHtml(v2 || '금액 협의')})</strong> 신규 매물을 장부에 등록했습니다.`);
         closeQuickModal();
       } else if (type === 'tour') {
         const time = /^\d{1,2}:\d{2}$/.test(v2) ? v2.padStart(5, '0') : '15:30';
@@ -3242,7 +3224,7 @@
             hint.textContent = '맞으면 실행, 아니면 다시 말하기 (글자를 눌러 고칠 수도 있어요)';
           } else if (!errored) {
             status.textContent = '마이크를 눌러 말씀하세요';
-            hint.textContent = '운전·임장 중 음성으로 매물·일정·특약을 즉시 처리합니다';
+            hint.textContent = '운전·임장 중 음성으로 매물·일정을 즉시 처리합니다';
           }
         },
         onError: (msg, unsupported) => {
@@ -3310,7 +3292,8 @@
       renderAllItems();
       restoring = true;
       try {
-        userData.chat.forEach(m => appendAllChatFeeds(m.s === 'user' ? 'user' : 'ai', m.h));
+        userData.chat.forEach(m => { if (!m.id) m.id = newChatId(); }); // 예전 기록에 번호 붙이기
+        renderChatFeeds();
         applySavedChecks();
         if (userData.notifCleared) ['notifBadge', 'notifBadgeM'].forEach(p => document.getElementById(p).classList.add('hidden'));
       } catch (e) {
@@ -3343,7 +3326,7 @@
     function openSettingsModal() {
       const d = userData;
       document.getElementById('storageStatusText').textContent = storageOk
-        ? `이 기기에 저장된 기록: 매물 ${d.listings.length} · 계약 ${d.contracts.length} · 고객 ${d.clients.length} · 투어 ${d.tours.length} · 임대차 ${d.leases.length} · 특약 ${d.clauses.length} · 보수 ${d.fees.length} · 리마인드 ${d.reminders.length} · 대화 ${d.chat.length}`
+        ? `이 기기에 저장된 기록: 매물 ${d.listings.length} · 계약 ${d.contracts.length} · 고객 ${d.clients.length} · 투어 ${d.tours.length} · 임대차 ${d.leases.length} · 보수 ${d.fees.length} · 리마인드 ${d.reminders.length} · 대화 ${d.chat.length}`
         : '⚠️ 이 브라우저에서는 저장이 막혀 있어 새로고침하면 기록이 사라집니다. (시크릿 모드 등)';
       applyFontSize(userData.fontSize); // 글자 크기 버튼 선택 표시
       document.getElementById('agentNameInput').value = agentName();
