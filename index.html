@@ -176,6 +176,17 @@
     body.mobile-preview-mode #globalTopBar { align-self: stretch; }
     body.mobile-preview-mode #centerHeader, body.mobile-preview-mode #leftSidebar { top: 0 !important; }
     body.mobile-preview-mode #osViewportFrame { min-height: 0 !important; max-height: calc(100vh - 90px) !important; }
+    /* 프리뷰: 창이 넓어도 폰 화면처럼 — 새로고침·운영 패널(데스크톱 전용) 숨기고, 명령창 마이크 표시 */
+    body.mobile-preview-mode #desktopUtilBar { display: none !important; }
+    body.mobile-preview-mode #cmdMicBtn { display: flex !important; }
+
+    /* 음성 입력 중(듣는 중) 표시 */
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+      70% { box-shadow: 0 0 0 9px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .mic-listening { background-color: #EF4444 !important; color: #FFFFFF !important; animation: micPulse 1.3s ease-out infinite; }
 
     /* ===== 글자 크기 (설정 → 보통 · 크게 · 아주 크게) — 기본은 '크게' (화면에 적힌 크기 그대로) ===== */
     :root[data-font="md"] .text-\[11\.5px\] { font-size: 10px !important; }
@@ -278,9 +289,29 @@
         </div>
       </div>
       <div class="flex items-center gap-1.5">
-        <button onclick="openVoiceModal()" class="p-2 rounded-xl bg-brand-orangeSoft text-brand-orange active:scale-95 transition-transform" title="음성 메모/명령">
-          <i data-lucide="mic" class="w-4 h-4"></i>
-        </button>
+        <!-- 알림 (모바일): 팝업은 헤더 기준으로 펼침 · 배지는 notifBadgeM -->
+        <div id="headerBellWrap">
+          <button onclick="toggleMenuPopover('notifPopoverM')" class="relative p-2 rounded-xl bg-brand-orangeSoft text-brand-orange active:scale-95 transition-transform" title="중개 알림" aria-label="중개 알림">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span id="notifBadgeM" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-orange ring-2 ring-white"></span>
+          </button>
+          <div id="notifPopoverM" class="hidden absolute left-4 right-4 top-full mt-1 bg-white rounded-2xl border border-ivory-border shadow-lg p-3.5 z-50">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-ivory-border">
+              <span class="text-xs font-bold text-charcoal">중개업 주요 알림 (2)</span>
+              <button onclick="clearNotifications()" class="text-[12.5px] text-brand-orange hover:underline">모두 읽음</button>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-ivory-bg">
+                <p class="font-semibold text-charcoal">임대차 3법 갱신청구권 만기 D-14</p>
+                <p class="text-[12.5px] text-charcoal-light mt-0.5">정민호 임차인 (만기 2개월 전) 연장 의사 확인 알림 도래</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-ivory-bg">
+                <p class="font-semibold text-charcoal">성수 트리마제 전세 잔금 D-3</p>
+                <p class="text-[12.5px] text-charcoal-light mt-0.5">잔금일 전 등기부등본 변동사항 재열람 예약 완료</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <button onclick="openMobileAiSheet()" class="px-2.5 py-1.5 rounded-xl bg-charcoal text-white text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition-transform">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-orange"></i>
           <span>온비서</span>
@@ -432,15 +463,19 @@
                 class="w-full bg-transparent text-[15px] text-charcoal placeholder:text-charcoal-light focus:outline-none"
                 autocomplete="off"
               />
-              <button type="submit" class="ml-2 px-3 py-1.5 rounded-xl bg-charcoal hover:bg-black text-white text-xs font-semibold shrink-0 transition-colors">
+              <!-- 음성 입력 (모바일): 누르고 말하면 위 입력창에 받아쓰기 → '실행' -->
+              <button id="cmdMicBtn" type="button" onclick="toggleCommandDictation()" class="lg:hidden ml-1 w-8 h-8 rounded-xl bg-brand-orangeSoft text-brand-orange flex items-center justify-center shrink-0 active:scale-95 transition-all" title="음성으로 입력" aria-label="음성으로 입력" aria-pressed="false">
+                <i data-lucide="mic" class="w-4 h-4"></i>
+              </button>
+              <button type="submit" class="ml-1.5 lg:ml-2 px-3 py-1.5 rounded-xl bg-charcoal hover:bg-black text-white text-xs font-semibold shrink-0 transition-colors">
                 실행
               </button>
             </form>
 
           </div>
 
-          <!-- 우측 유틸리티 (새로고침 · 알림 · 운영 패널) -->
-          <div class="flex items-center gap-2 shrink-0">
+          <!-- 우측 유틸리티 (새로고침 · 알림 · 운영 패널) — 데스크톱 전용. 모바일은 알림이 상단 헤더로, 동기화·운영 패널은 제거 -->
+          <div id="desktopUtilBar" class="hidden lg:flex items-center gap-2 shrink-0">
             <div class="flex items-center gap-1.5">
               <!-- 새로고침 -->
               <button onclick="triggerRefresh()" title="매물·등기변동·임대차 만기 동기화" class="p-2.5 rounded-xl bg-white hover:bg-ivory-subtle border border-ivory-border text-charcoal-muted hover:text-charcoal shadow-soft transition-all">
@@ -449,7 +484,7 @@
 
               <!-- 알림 연결 -->
               <div class="relative">
-                <button onclick="togglePopover('notifPopover')" title="중개 알림" class="p-2.5 rounded-xl bg-white hover:bg-ivory-subtle border border-ivory-border text-charcoal-muted hover:text-charcoal shadow-soft transition-all relative">
+                <button onclick="toggleMenuPopover('notifPopover')" title="중개 알림" class="p-2.5 rounded-xl bg-white hover:bg-ivory-subtle border border-ivory-border text-charcoal-muted hover:text-charcoal shadow-soft transition-all relative">
                   <i data-lucide="bell" class="w-4 h-4"></i>
                   <span id="notifBadge" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand-orange ring-2 ring-white"></span>
                 </button>
@@ -473,7 +508,7 @@
 
               <!-- 운영 패널 -->
               <div class="relative">
-                <button onclick="togglePopover('opsPopover')" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-ivory-subtle border border-ivory-border text-xs font-semibold text-charcoal shadow-soft transition-all">
+                <button onclick="toggleMenuPopover('opsPopover')" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-ivory-subtle border border-ivory-border text-xs font-semibold text-charcoal shadow-soft transition-all">
                   <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-orange"></i>
                   <span>운영 패널</span>
                 </button>
@@ -654,8 +689,8 @@
               <!-- 오디오 웨이브 재생기 (토글) -->
               <div id="audioBriefingBar" class="hidden mt-3 p-3 rounded-2xl bg-brand-orangeSoft border border-brand-orangeBorder flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <button onclick="toggleAudioBriefing()" class="w-8 h-8 rounded-full bg-brand-orange text-white flex items-center justify-center shrink-0">
-                    <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+                  <button onclick="toggleAudioBriefing()" class="w-8 h-8 rounded-full bg-brand-orange text-white flex items-center justify-center shrink-0" title="브리핑 중지" aria-label="브리핑 중지">
+                    <i data-lucide="square" class="w-3.5 h-3.5"></i>
                   </button>
                   <div class="flex items-end gap-1 h-4 shrink-0">
                     <span class="wave-bar w-1 bg-brand-orange rounded-full"></span>
@@ -666,7 +701,7 @@
                   </div>
                   <p id="audioBriefingText" class="text-xs font-semibold text-charcoal truncate">“오늘의 투어 일정과 계약·임대차 만기 알림을 확인하세요...”</p>
                 </div>
-                <span class="text-[12.5px] font-mono font-bold text-brand-orange shrink-0">00:38 / 02:15</span>
+                <span id="audioBriefingTime" class="text-[12.5px] font-mono font-bold text-brand-orange shrink-0">00:00</span>
               </div>
 
               <!-- 하단 버튼: 전체 브리핑 듣기 & 3분 핵심 요약 모달 -->
@@ -1275,14 +1310,24 @@
         </div>
 
         <div class="py-2 flex flex-col items-center">
-          <div class="w-14 h-14 rounded-full bg-brand-orangeSoft border-2 border-brand-orange flex items-center justify-center text-brand-orange mb-2.5 relative">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-30"></span>
+          <!-- 누르면 듣기 시작/멈춤 (toggleVoiceListening) -->
+          <button id="voiceMicBtn" type="button" onclick="toggleVoiceListening()" class="w-14 h-14 rounded-full bg-brand-orangeSoft border-2 border-brand-orange flex items-center justify-center text-brand-orange mb-2.5 relative active:scale-95 transition-transform" aria-label="말하기 시작/멈춤">
             <i data-lucide="mic" class="w-6 h-6"></i>
-          </div>
-          <p class="text-sm font-bold text-charcoal">현장 음성 명령을 말씀하세요</p>
-          <p class="text-[12.5px] text-charcoal-muted mt-0.5">운전·임장 중 음성으로 매물·일정·특약을 즉시 처리합니다</p>
+          </button>
+          <p id="voiceStatus" class="text-sm font-bold text-charcoal">마이크를 눌러 말씀하세요</p>
+          <p id="voiceHint" class="text-[12.5px] text-charcoal-muted mt-0.5">운전·임장 중 음성으로 매물·일정·특약을 즉시 처리합니다</p>
         </div>
 
+        <!-- 인식된 문장 (고쳐 쓸 수 있음) -->
+        <div id="voiceResultBox" class="hidden space-y-2 text-left">
+          <textarea id="voiceTranscript" rows="2" class="w-full px-3 py-2 rounded-xl bg-ivory-bg border border-ivory-border focus:border-brand-orange focus:bg-white text-sm text-charcoal focus:outline-none resize-none" placeholder="인식된 말이 여기에 나와요"></textarea>
+          <div class="flex gap-2">
+            <button type="button" onclick="startVoiceListening()" class="flex-1 py-2 rounded-xl bg-ivory-subtle text-charcoal text-xs font-semibold">다시 말하기</button>
+            <button type="button" onclick="runVoiceTranscript()" class="flex-1 py-2 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white text-xs font-semibold">실행</button>
+          </div>
+        </div>
+
+        <p class="text-left text-[12.5px] text-charcoal-light -mb-1">예시 문장 (눌러서 바로 실행)</p>
         <div class="space-y-1.5 text-left">
           <button onclick="simulateVoiceCommand('래미안 102동 84A 전세 6.5억 매물 등록해줘')" class="w-full p-2.5 rounded-xl bg-ivory-bg hover:bg-brand-orangeSoft text-xs font-medium text-charcoal hover:text-brand-orange border border-ivory-border transition-colors">
             🎙️ “래미안 102동 84A 전세 6.5억 매물 등록해줘”
@@ -1647,7 +1692,7 @@
       setTimeout(() => {
         el.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => el.remove(), 300);
-      }, 2800);
+      }, Math.min(6500, Math.max(2800, String(msg).length * 60))); // 긴 안내는 조금 더 오래 보여줌
     }
 
     // ==================== 데스크톱 <-> 모바일 화면 프리뷰 전환 ====================
@@ -1774,17 +1819,15 @@
       el.classList.add('card-highlight');
     }
 
-    function togglePopover(id) {
+    function toggleMenuPopover(id) {
       const target = document.getElementById(id);
       const isHidden = target.classList.contains('hidden');
-      document.getElementById('notifPopover').classList.add('hidden');
-      document.getElementById('opsPopover').classList.add('hidden');
+      ['notifPopover', 'notifPopoverM', 'opsPopover'].forEach(p => document.getElementById(p).classList.add('hidden'));
       if (isHidden) target.classList.remove('hidden');
     }
 
     function clearNotifications() {
-      document.getElementById('notifBadge').classList.add('hidden');
-      document.getElementById('notifPopover').classList.add('hidden');
+      ['notifBadge', 'notifBadgeM', 'notifPopover', 'notifPopoverM'].forEach(p => document.getElementById(p).classList.add('hidden'));
       userData.notifCleared = true;
       saveData();
       showToast('모든 중개 알림을 확인했습니다.');
@@ -1801,17 +1844,192 @@
       }, 600);
     }
 
+    // ==================== 전체 브리핑 듣기 (기기 내장 음성 읽기 · speechSynthesis) ====================
+    // 화면의 '오늘 브리핑' 5줄 + 날짜·날씨를 한국어 음성으로 읽어줌 (인터넷·가입 불필요)
+    // 안드로이드는 '설정 → 텍스트 음성 변환(TTS)'의 한국어 음성, 아이폰은 기본 한국어 음성을 사용
+    let briefingSession = 0, briefingTimer = null;
+    function pickKoreanVoice() {
+      const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+      return vs.find(v => /^ko/i.test(v.lang) && v.localService) || vs.find(v => /^ko/i.test(v.lang)) || null;
+    }
+    // 읽기 좋게 바꿈: D-3 → 3일 남은, 1~8° → 최저 1도 최고 8도, · → 쉼표
+    function speakable(s) {
+      return String(s || '')
+        .replace(/D-Day/gi, '오늘')
+        .replace(/D-(\d+)/g, '$1일 남은')
+        .replace(/D\+(\d+)/g, '$1일 지난')
+        .replace(/(-?\d+)\s*~\s*(-?\d+)\s*°/g, '최저 $1도 최고 $2도')
+        .replace(/°C?/g, '도')
+        .replace(/-(\d+)도/g, '영하 $1도')
+        .replace(/\b(\d{1,2}):(\d{2})\b/g, (m, h, mm) => `${+h}시${+mm ? ` ${+mm}분` : ''}`)
+        .replace(/(\d),(?=\d{3})/g, '$1')
+        .replace(/㎡/g, '제곱미터')
+        .replace(/[·•|]/g, ', ')
+        .replace(/[“”"()…]/g, ' ')
+        .replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').replace(/,\s*,/g, ',').trim();
+    }
+    function buildBriefingLines() {
+      const txt = id => (document.getElementById(id)?.textContent || '').trim();
+      const date = txt('greetingDate').split('·')[0].trim();
+      const lines = [`${agentName()} 대표님, ${date} 오늘 브리핑입니다.`];
+      const w = txt('weatherText');
+      if (w && !/불러오|못했/.test(w)) lines.push(`날씨는 ${w}입니다.`);
+      [['일정', 'briefing-schedule'], ['계약과 잔금', 'briefing-contracts'], ['매물', 'briefing-listings'],
+       ['임대차 만기', 'briefing-lease'], ['중개보수', 'briefing-settlement']].forEach(([label, id]) => {
+        const t = txt(id);
+        if (t && !/불러오는 중/.test(t)) lines.push(`${label}. ${t}.`);
+      });
+      lines.push('이상입니다. 오늘도 좋은 계약 되세요.');
+      return lines;
+    }
+    function setBriefingUi(on) {
+      appState.audioPlaying = on;
+      document.getElementById('audioBriefingBar').classList.toggle('hidden', !on);
+      document.getElementById('btnAudioBriefing').innerHTML = on
+        ? '<span>⏹️</span><span>브리핑 중지</span>'
+        : '<span>🔊</span><span>전체 브리핑 듣기</span>';
+      if (on) document.getElementById('audioBriefingTime').textContent = '00:00';
+    }
+    function stopAudioBriefing(finished) {
+      briefingSession++;
+      clearInterval(briefingTimer);
+      briefingTimer = null;
+      try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* 무시 */ }
+      setBriefingUi(false);
+      if (finished) showToast('🔊 오늘 브리핑을 모두 읽어드렸어요.');
+    }
     function toggleAudioBriefing() {
-      const bar = document.getElementById('audioBriefingBar');
-      const btn = document.getElementById('btnAudioBriefing');
-      appState.audioPlaying = !appState.audioPlaying;
-      if (appState.audioPlaying) {
-        bar.classList.remove('hidden');
-        btn.innerHTML = '<span>⏸️</span><span>브리핑 일시정지</span>';
-      } else {
-        bar.classList.add('hidden');
-        btn.innerHTML = '<span>🔊</span><span>전체 브리핑 듣기</span>';
+      if (appState.audioPlaying) { stopAudioBriefing(); return; }
+      if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') {
+        showToast('이 브라우저는 음성 읽기를 지원하지 않아요. Chrome · 삼성 인터넷 · Safari로 열어주세요.');
+        return;
       }
+      stopDictation(); // 마이크와 동시에 쓰지 않음
+      const session = ++briefingSession;
+      const lines = buildBriefingLines();
+      const voice = pickKoreanVoice();
+      speechSynthesis.cancel();
+      // 한 줄씩 나눠서 대기열에 넣음 (긴 문장을 한 번에 읽으면 일부 브라우저가 중간에 끊음)
+      lines.forEach(line => {
+        const u = new SpeechSynthesisUtterance(speakable(line));
+        u.lang = 'ko-KR';
+        if (voice) u.voice = voice;
+        u.rate = 1;
+        u.onstart = () => { if (session === briefingSession) document.getElementById('audioBriefingText').textContent = `“${line}”`; };
+        u.onerror = e => {
+          if (session !== briefingSession || e.error === 'interrupted' || e.error === 'canceled') return;
+          if (e.error === 'not-allowed') { stopAudioBriefing(); showToast('소리 재생이 막혀 있어요. 버튼을 한 번 더 눌러주세요.'); }
+        };
+        speechSynthesis.speak(u);
+      });
+      if (speechSynthesis.paused) speechSynthesis.resume(); // 일부 PC 크롬: 멈춤 상태로 남아 있는 경우
+      setBriefingUi(true);
+      // 경과 시간 표시 + 다 읽었는지 확인 (기기에 따라 끝 신호가 안 오는 경우가 있어 직접 확인)
+      const startedAt = Date.now();
+      let heard = false;
+      briefingTimer = setInterval(() => {
+        if (session !== briefingSession) return;
+        const sec = Math.floor((Date.now() - startedAt) / 1000);
+        document.getElementById('audioBriefingTime').textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+        const busy = speechSynthesis.speaking || speechSynthesis.pending;
+        if (busy) heard = true;
+        if (heard && !busy) stopAudioBriefing(true);
+        else if (!heard && sec >= 5) {
+          stopAudioBriefing();
+          showToast('음성이 나오지 않아요. 미디어 볼륨과 기기의 한국어 음성(TTS) 설정을 확인해주세요.');
+        }
+      }, 500);
+    }
+
+    // ==================== 음성 입력 (브라우저 음성 인식 · Web Speech API) ====================
+    // 안드로이드 Chrome·삼성 인터넷·Edge, 아이폰 Safari에서 동작 · https 주소(배포된 앱)에서만 마이크 사용 가능
+    // 아이폰 '홈 화면 앱'처럼 지원하지 않는 곳에서는 키보드의 🎤(받아쓰기) 버튼을 쓰도록 안내
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let activeRec = null, activeRecOwner = null;
+    function voiceSupportProblem() {
+      if (!SpeechRec) return isIOS()
+        ? '아이폰 홈 화면 앱에서는 음성 인식이 막혀 있어요. 키보드의 🎤(받아쓰기) 버튼으로 말씀해 주세요.'
+        : '이 브라우저는 음성 인식을 지원하지 않아요. Chrome · 삼성 인터넷으로 열거나 키보드의 🎤 버튼을 써 주세요.';
+      if (!window.isSecureContext) return '음성 인식은 https 주소로 연 앱에서만 쓸 수 있어요.';
+      return null;
+    }
+    function voiceErrorMessage(code) {
+      return ({
+        'not-allowed': '마이크 권한이 꺼져 있어요. 주소창 왼쪽 🔒 (또는 휴대폰 설정 → 앱 → 브라우저 → 권한)에서 마이크를 허용해 주세요.',
+        'service-not-allowed': isIOS()
+          ? '아이폰 홈 화면 앱에서는 음성 인식이 막혀 있어요. Safari로 열거나 키보드의 🎤(받아쓰기) 버튼을 써 주세요.'
+          : '이 기기에서 음성 인식 서비스를 쓸 수 없어요. 키보드의 🎤 버튼을 써 주세요.',
+        'no-speech': '말소리가 들리지 않았어요. 마이크를 누르고 다시 말씀해 주세요.',
+        'audio-capture': '마이크를 찾지 못했어요. 통화 중이거나 다른 앱이 마이크를 쓰고 있는지 확인해 주세요.',
+        'network': '음성 인식은 인터넷 연결이 필요해요. 연결을 확인해 주세요.',
+        'language-not-supported': '이 기기에서는 한국어 음성 인식을 지원하지 않아요.'
+      })[code] || '음성 인식이 중단됐어요. 다시 시도해 주세요.';
+    }
+    // 받아쓰기 시작: onText(지금까지 들은 말) · onEnd(최종 문장, 오류 여부) · onError(안내 문구)
+    function startDictation(owner, { onText, onEnd, onError }) {
+      const problem = voiceSupportProblem();
+      if (problem) { onError(problem, true); return false; }
+      stopDictation();
+      if (appState.audioPlaying) stopAudioBriefing();
+      const rec = new SpeechRec();
+      rec.lang = 'ko-KR';
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.maxAlternatives = 1;
+      let heard = '', errored = false;
+      rec.onresult = e => {
+        heard = Array.from(e.results).map(r => r[0].transcript).join('').trim();
+        onText(heard);
+      };
+      rec.onerror = e => {
+        if (e.error === 'aborted') return;
+        errored = true;
+        onError(voiceErrorMessage(e.error), false);
+      };
+      rec.onend = () => {
+        if (activeRec === rec) { activeRec = null; activeRecOwner = null; }
+        onEnd(heard, errored);
+      };
+      activeRec = rec;
+      activeRecOwner = owner;
+      try {
+        rec.start();
+      } catch (err) {
+        activeRec = null; activeRecOwner = null;
+        onError('음성 인식을 시작하지 못했어요. 잠시 후 다시 눌러주세요.', false);
+        return false;
+      }
+      return true;
+    }
+    function stopDictation() {
+      if (!activeRec) return;
+      const r = activeRec;
+      activeRec = null; activeRecOwner = null;
+      try { r.stop(); } catch (e) { /* 이미 끝남 */ }
+    }
+    function setMicBtnState(btn, on) {
+      btn.classList.toggle('mic-listening', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+
+    // 명령창 마이크: 말한 내용을 명령창에 받아쓰기 → 확인 후 '실행'
+    function toggleCommandDictation() {
+      if (activeRecOwner === 'cmd') { stopDictation(); return; }
+      const btn = document.getElementById('cmdMicBtn');
+      const input = document.getElementById('topCommandInput');
+      const placeholder = input.placeholder;
+      const before = input.value.trim();
+      const done = () => { setMicBtnState(btn, false); input.placeholder = placeholder; };
+      const ok = startDictation('cmd', {
+        onText: t => { input.value = before ? `${before} ${t}` : t; },
+        onEnd: () => done(),
+        onError: (msg, unsupported) => {
+          done();
+          showToast(msg);
+          if (unsupported) input.focus(); // 키보드를 띄워 키보드 🎤 받아쓰기를 바로 쓸 수 있게
+        }
+      });
+      if (ok) { setMicBtnState(btn, true); input.placeholder = '듣고 있어요… 말씀하세요'; }
     }
 
     // ==================== 특약 복사 & 위험물건 자동 진단 ====================
@@ -2377,7 +2595,7 @@
       if (leaseHot) parts.push(`임대차 갱신 구간 ${leaseHot}건`);
       document.getElementById('greetingSummary').textContent = parts.length ? `오늘 ${parts.join(' · ')} 일정이 있습니다.` : '오늘은 급한 일정이 없습니다. 매물 홍보에 집중해 보세요!';
       const nt = userData.tours.filter(t => !t.done).sort((a, b) => String(a.time).localeCompare(String(b.time)))[0];
-      document.getElementById('audioBriefingText').textContent = `“${nt ? `${nt.time} ${nt.title}` : '오늘 남은 투어 없음'}${k ? ` · ${k.stage || '계약'} ${ddayLabel(kn)} ${k.title}` : ''} 일정을 확인하세요...”`;
+      if (!appState.audioPlaying) document.getElementById('audioBriefingText').textContent = `“${nt ? `${nt.time} ${nt.title}` : '오늘 남은 투어 없음'}${k ? ` · ${k.stage || '계약'} ${ddayLabel(kn)} ${k.title}` : ''} 일정을 확인하세요...”`;
       const chip = document.getElementById('weatherContractChip');
       chip.textContent = k ? `${k.stage || '계약'} ${ddayLabel(kn)}` : '계약 일정 없음';
     }
@@ -2983,17 +3201,81 @@
       }
     }
 
+    // 음성 대화 창: 열자마자 듣기 시작 → 들은 문장 확인(고쳐 쓰기 가능) → 실행
     function openVoiceModal() {
       closeMobileSidebar();
       const modal = document.getElementById('voiceModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      document.getElementById('voiceTranscript').value = '';
+      document.getElementById('voiceResultBox').classList.add('hidden');
+      startVoiceListening(); // 버튼을 누른 직후라 마이크 권한 요청이 가능
     }
 
     function closeVoiceModal() {
+      if (activeRecOwner === 'modal') stopDictation();
       const modal = document.getElementById('voiceModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    let voiceListenToken = 0;
+    function voiceModalOpen() { return !document.getElementById('voiceModal').classList.contains('hidden'); }
+
+    function startVoiceListening() {
+      const status = document.getElementById('voiceStatus');
+      const hint = document.getElementById('voiceHint');
+      const box = document.getElementById('voiceResultBox');
+      const ta = document.getElementById('voiceTranscript');
+      const mic = document.getElementById('voiceMicBtn');
+      const token = ++voiceListenToken; // 이전에 듣던 것이 늦게 끝나도 새 화면을 덮어쓰지 않게
+      const ok = startDictation('modal', {
+        onText: t => { if (token !== voiceListenToken) return; box.classList.remove('hidden'); ta.value = t; },
+        onEnd: (t, errored) => {
+          if (token !== voiceListenToken) return;
+          setMicBtnState(mic, false);
+          if (!voiceModalOpen()) return;
+          if (t) {
+            ta.value = t;
+            box.classList.remove('hidden');
+            status.textContent = '이렇게 들었어요';
+            hint.textContent = '맞으면 실행, 아니면 다시 말하기 (글자를 눌러 고칠 수도 있어요)';
+          } else if (!errored) {
+            status.textContent = '마이크를 눌러 말씀하세요';
+            hint.textContent = '운전·임장 중 음성으로 매물·일정·특약을 즉시 처리합니다';
+          }
+        },
+        onError: (msg, unsupported) => {
+          if (token !== voiceListenToken) return;
+          setMicBtnState(mic, false);
+          status.textContent = unsupported ? '이 화면에서는 음성 인식이 안 돼요' : '음성 인식이 안 됐어요';
+          hint.textContent = msg;
+          if (unsupported) { // 직접 입력 / 키보드 🎤 받아쓰기로 대신
+            box.classList.remove('hidden');
+            ta.placeholder = '여기를 눌러 입력하거나 키보드의 🎤로 말씀하세요';
+            ta.focus();
+          }
+        }
+      });
+      if (ok) {
+        setMicBtnState(mic, true);
+        status.textContent = '듣고 있어요… 말씀하세요';
+        hint.textContent = '말이 끝나면 자동으로 멈춰요 · 마이크를 누르면 멈춤';
+        ta.value = '';
+        box.classList.add('hidden');
+      }
+    }
+
+    function toggleVoiceListening() {
+      if (activeRecOwner === 'modal') stopDictation();
+      else startVoiceListening();
+    }
+
+    function runVoiceTranscript() {
+      const t = document.getElementById('voiceTranscript').value.trim();
+      if (!t) { showToast('실행할 문장이 없어요. 다시 말하거나 입력해 주세요.'); return; }
+      closeVoiceModal();
+      sendChatMessage(t);
     }
 
     function simulateVoiceCommand(cmd) {
@@ -3030,7 +3312,7 @@
       try {
         userData.chat.forEach(m => appendAllChatFeeds(m.s === 'user' ? 'user' : 'ai', m.h));
         applySavedChecks();
-        if (userData.notifCleared) document.getElementById('notifBadge').classList.add('hidden');
+        if (userData.notifCleared) ['notifBadge', 'notifBadgeM'].forEach(p => document.getElementById(p).classList.add('hidden'));
       } catch (e) {
         console.warn('저장된 기록 일부를 불러오지 못했습니다.', e);
       } finally {
@@ -3053,6 +3335,7 @@
       m.classList.add('flex');
     }
     function closeModal(id) {
+      if (id === 'voiceModal') { closeVoiceModal(); return; } // 듣기도 함께 멈춤
       const m = document.getElementById(id);
       m.classList.add('hidden');
       m.classList.remove('flex');
@@ -3210,6 +3493,16 @@
       // 실제 날씨: 처음 한 번 + 30분마다
       loadWeather(false);
       setInterval(() => loadWeather(false), WEATHER_TTL_MS);
+
+      // 앱으로 돌아올 때: 날짜가 바뀌었으면 D-day 다시 계산 (모바일에는 수동 '동기화' 버튼이 없음) · 백그라운드로 가면 마이크 끔
+      let renderedDay = todayKey();
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { stopDictation(); return; }
+        if (todayKey() !== renderedDay) { renderedDay = todayKey(); renderAllItems(); }
+        loadWeather(false);
+      });
+      window.addEventListener('pagehide', () => { stopDictation(); if (window.speechSynthesis) speechSynthesis.cancel(); });
+      if (window.speechSynthesis) speechSynthesis.getVoices(); // 한국어 음성 목록 미리 불러오기
 
       // 모달: 바깥 영역 클릭 / ESC 키로 닫기
       const modalIds = ['quickModal', 'voiceModal', 'summaryModal', 'modal-form', 'modal-settings', 'modal-install'];
