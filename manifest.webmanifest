@@ -1,0 +1,21 @@
+{
+  "name": "랜드온 — 공인중개사 AI 비서",
+  "short_name": "랜드온",
+  "description": "매물 장부·고객 매칭·계약/잔금·특약·임대차 만기·투어 일정을 한곳에서 관리하는 공인중개사 전용 AI 비서",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F8FE",
+  "theme_color": "#1A73F0",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "매물 빠른 등록", "short_name": "매물 등록", "url": "./index.html?action=listing", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "투어 일정 추가", "short_name": "투어 추가", "url": "./index.html?action=tour", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
