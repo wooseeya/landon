@@ -142,7 +142,7 @@
       grid-template-columns: 1fr !important;
     }
     body.mobile-preview-mode #mobileBottomNav {
-      display: flex !important;
+      display: grid !important;
       position: absolute !important;
     }
     body.mobile-preview-mode #mobileBottomSheet,
@@ -1154,23 +1154,23 @@
     </aside>
 
     <!-- ==================== 4. 모바일 전용 하단 내비게이션 ==================== -->
-    <nav id="mobileBottomNav" class="flex lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-ivory-border px-2 py-1.5 items-center justify-around shadow-soft">
-      <button onclick="switchMobileMainTab('home'); window.scrollTo({top:0, behavior:'smooth'});" class="flex flex-col items-center gap-0.5 py-1 px-3 text-brand-orange">
+    <nav id="mobileBottomNav" class="grid grid-cols-5 lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-ivory-border px-2 py-1.5 items-center shadow-soft">
+      <button onclick="switchMobileMainTab('home'); window.scrollTo({top:0, behavior:'smooth'});" class="flex flex-col items-center gap-0.5 py-1 px-1 text-brand-orange">
         <i data-lucide="home" class="w-4 h-4"></i>
         <span class="text-[11.5px] font-bold">홈</span>
       </button>
-      <button onclick="openMobileAiSheet()" class="flex flex-col items-center gap-0.5 py-1 px-3 text-charcoal-muted hover:text-charcoal">
+      <button onclick="openMobileAiSheet()" class="flex flex-col items-center gap-0.5 py-1 px-1 text-charcoal-muted hover:text-charcoal">
         <i data-lucide="message-circle" class="w-4 h-4"></i>
         <span class="text-[11.5px] font-semibold">온비서</span>
       </button>
-      <button onclick="openQuickModal('listing')" class="flex flex-col items-center justify-center -mt-4 w-12 h-12 rounded-full bg-brand-orange text-white shadow-md active:scale-95 transition-transform" aria-label="매물 빠른 등록">
+      <button onclick="openQuickModal('listing')" class="flex flex-col items-center justify-center justify-self-center -mt-4 w-12 h-12 rounded-full bg-brand-orange text-white shadow-md active:scale-95 transition-transform" aria-label="매물 빠른 등록">
         <i data-lucide="plus" class="w-5 h-5"></i>
       </button>
-      <button onclick="switchMobileMainTab('home'); scrollToCard('card-clauses');" class="flex flex-col items-center gap-0.5 py-1 px-3 text-charcoal-muted hover:text-charcoal">
+      <button onclick="switchMobileMainTab('home'); scrollToCard('card-clauses');" class="flex flex-col items-center gap-0.5 py-1 px-1 text-charcoal-muted hover:text-charcoal">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
         <span class="text-[11.5px] font-semibold">위험진단</span>
       </button>
-      <button onclick="openMobileSidebar()" class="flex flex-col items-center gap-0.5 py-1 px-3 text-charcoal-muted hover:text-charcoal">
+      <button onclick="openMobileSidebar()" class="flex flex-col items-center gap-0.5 py-1 px-1 text-charcoal-muted hover:text-charcoal">
         <i data-lucide="grid" class="w-4 h-4"></i>
         <span class="text-[11.5px] font-semibold">전체메뉴</span>
       </button>
@@ -2091,46 +2091,73 @@
       })[code] || '음성 인식이 중단됐어요. 다시 시도해 주세요.';
     }
     // 받아쓰기 시작: onText(지금까지 들은 말) · onEnd(최종 문장, 오류 여부) · onError(안내 문구)
+    // 브라우저 음성 인식은 잠깐만 쉬어도 스스로 끝나므로, 말하는 도중이면 자동으로 이어서 계속 들음
+    //  - 말을 시작하기 전: 8초까지 기다림 · 말한 뒤: 4초 동안 조용하면 마침 · 마이크를 다시 누르면 바로 마침
+    const DICTATE_WAIT_FIRST_MS = 8000, DICTATE_WAIT_AFTER_MS = 4000;
     function startDictation(owner, { onText, onEnd, onError }) {
       const problem = voiceSupportProblem();
       if (problem) { onError(problem, true); return false; }
       stopDictation();
       if (appState.audioPlaying) stopAudioBriefing();
-      const rec = new SpeechRec();
-      rec.lang = 'ko-KR';
-      rec.interimResults = true;
-      rec.continuous = false;
-      rec.maxAlternatives = 1;
-      let heard = '', errored = false;
-      rec.onresult = e => {
-        heard = Array.from(e.results).map(r => r[0].transcript).join('').trim();
-        onText(heard);
+      const session = { owner, stopped: false, errored: false, committed: '', interim: '', lastActivity: Date.now(), rec: null };
+      const join = (a, b) => [a, b].filter(Boolean).join(' ').trim();
+      const heard = () => join(session.committed, session.interim);
+      const finish = () => {
+        if (activeSession === session) { activeSession = null; activeRec = null; activeRecOwner = null; }
+        onEnd(join(session.committed, session.interim), session.errored);
       };
-      rec.onerror = e => {
-        if (e.error === 'aborted') return;
-        errored = true;
-        onError(voiceErrorMessage(e.error), false);
+      const begin = () => {
+        const rec = new SpeechRec();
+        session.rec = rec;
+        rec.lang = 'ko-KR';
+        rec.interimResults = true;
+        rec.continuous = false;
+        rec.maxAlternatives = 1;
+        session.interim = '';
+        rec.onresult = e => {
+          session.lastActivity = Date.now();
+          let interim = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            const r = e.results[i];
+            if (r.isFinal) session.committed = join(session.committed, r[0].transcript.trim());
+            else interim = join(interim, r[0].transcript.trim());
+          }
+          session.interim = interim;
+          onText(heard());
+        };
+        rec.onerror = e => {
+          if (e.error === 'aborted' || e.error === 'no-speech') return; // 조용했을 뿐 → onend 에서 계속할지 판단
+          session.errored = true;
+          session.stopped = true;
+          onError(voiceErrorMessage(e.error), false);
+        };
+        rec.onend = () => {
+          session.committed = join(session.committed, session.interim); // 마무리 안 된 말도 살림
+          session.interim = '';
+          const quietFor = Date.now() - session.lastActivity;
+          const limit = session.committed ? DICTATE_WAIT_AFTER_MS : DICTATE_WAIT_FIRST_MS;
+          if (session.stopped || activeSession !== session || quietFor >= limit) { finish(); return; }
+          try { begin(); } catch (err) { finish(); } // 아직 말하는 중 → 이어서 듣기
+        };
+        rec.start();
       };
-      rec.onend = () => {
-        if (activeRec === rec) { activeRec = null; activeRecOwner = null; }
-        onEnd(heard, errored);
-      };
-      activeRec = rec;
+      activeSession = session;
       activeRecOwner = owner;
       try {
-        rec.start();
+        begin();
+        activeRec = session.rec;
       } catch (err) {
-        activeRec = null; activeRecOwner = null;
+        activeSession = null; activeRec = null; activeRecOwner = null;
         onError('음성 인식을 시작하지 못했어요. 잠시 후 다시 눌러주세요.', false);
         return false;
       }
       return true;
     }
-    function stopDictation() {
-      if (!activeRec) return;
-      const r = activeRec;
-      activeRec = null; activeRecOwner = null;
-      try { r.stop(); } catch (e) { /* 이미 끝남 */ }
+    let activeSession = null;    function stopDictation() {
+      const s = activeSession;
+      if (!s) return;
+      s.stopped = true; // onend 에서 마무리(finish) 하도록 두고, 지금 듣는 것만 멈춤
+      try { s.rec && s.rec.stop(); } catch (e) { /* 이미 끝남 */ }
     }
     function setMicBtnState(btn, on) {
       btn.classList.toggle('mic-listening', on);
@@ -3825,7 +3852,7 @@
       if (ok) {
         setMicBtnState(mic, true);
         status.textContent = '듣고 있어요… 말씀하세요';
-        hint.textContent = '말이 끝나면 자동으로 멈춰요 · 마이크를 누르면 멈춤';
+        hint.textContent = '말을 마치고 잠시 조용하면 끝나요 · 마이크를 누르면 바로 마침';
         ta.value = '';
         box.classList.add('hidden');
       }
