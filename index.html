@@ -162,7 +162,7 @@
     body.mobile-preview-mode #osViewportFrame .xl\:justify-end { justify-content: space-between !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:inline { display: block !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:text-\[23px\] { font-size: 19px !important; line-height: 1.75rem !important; }
-    body.mobile-preview-mode #osViewportFrame .sm\:grid-cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    body.mobile-preview-mode #osViewportFrame .sm\:grid-cols-6 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
     body.mobile-preview-mode #osViewportFrame .md\:grid-cols-2,
     body.mobile-preview-mode #osViewportFrame .xl\:grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; }
     body.mobile-preview-mode #osViewportFrame .sm\:p-6 { padding: 1.25rem !important; }
@@ -724,7 +724,7 @@
                 <span class="text-[12.5px] text-charcoal-light">현장 즉시 기록 · 진단·안내 생성</span>
               </div>
 
-              <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-4">
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 mb-4">
                 <button onclick="openQuickModal('listing')" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
                   <div class="w-12 h-12 rounded-full bg-brand-orangeSoft group-hover:bg-brand-orange text-brand-orange group-hover:text-white border border-brand-orangeBorder flex items-center justify-center transition-colors shadow-soft">
                     <i data-lucide="home" class="w-5 h-5"></i>
@@ -739,7 +739,14 @@
                   <span class="text-xs font-semibold text-charcoal">투어 일정</span>
                 </button>
 
-                <button onclick="scrollToCard('card-clauses'); document.getElementById('riskDepositInput').focus();" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
+                <button onclick="openItemForm('contracts')" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
+                  <div class="w-12 h-12 rounded-full bg-ivory-subtle group-hover:bg-charcoal text-charcoal group-hover:text-white border border-ivory-border flex items-center justify-center transition-colors shadow-soft">
+                    <i data-lucide="file-signature" class="w-5 h-5"></i>
+                  </div>
+                  <span class="text-xs font-semibold text-charcoal">계약·잔금</span>
+                </button>
+
+                <button onclick="openRiskModal()" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-ivory-bg active:scale-95 transition-all">
                   <div class="w-12 h-12 rounded-full bg-ivory-subtle group-hover:bg-charcoal text-charcoal group-hover:text-white border border-ivory-border flex items-center justify-center transition-colors shadow-soft">
                     <i data-lucide="shield-alert" class="w-5 h-5"></i>
                   </div>
@@ -780,19 +787,18 @@
 
                   <!-- 유형별 매물 카운트 -->
                   <div class="grid grid-cols-3 gap-1.5 text-center my-2">
-                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
+                    <div role="button" tabindex="0" onclick="setListingType('sale')" title="매매만 보기" class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70 cursor-pointer hover:border-brand-orange transition-colors">
                       <p class="text-[12px] text-charcoal-muted">매매</p>
                       <p id="countSale" class="text-sm font-extrabold text-charcoal mt-0.5">14</p>
                     </div>
-                    <div class="p-2 rounded-2xl bg-brand-orangeSoft/70 border border-brand-orangeBorder">
+                    <div role="button" tabindex="0" onclick="setListingType('jeonse')" title="전세만 보기" class="p-2 rounded-2xl bg-brand-orangeSoft/70 border border-brand-orangeBorder cursor-pointer hover:border-brand-orange transition-colors">
                       <p class="text-[12px] text-brand-orange font-semibold">전세</p>
                       <p id="countJeonse" class="text-sm font-extrabold text-brand-orange mt-0.5">19</p>
                     </div>
-                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
+                    <div role="button" tabindex="0" onclick="setListingType('monthly')" title="월세만 보기" class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70 cursor-pointer hover:border-brand-orange transition-colors">
                       <p class="text-[12px] text-charcoal-muted">월세</p>
                       <p id="countMonthly" class="text-sm font-extrabold text-charcoal mt-0.5">23</p>
                     </div>
-                  </div>
                   </div>
 
                   <!-- 항목은 저장된 데이터로 그림 (renderListings) — 위 유형별 건수도 이 목록으로 계산 -->
@@ -910,7 +916,7 @@
                 </div>
               </article>
 
-              <!-- (6) 위험물건 자동 진단 -->
+              <!-- (6) 위험물건 진단: 보증금 회수 시뮬레이션 · HUG 자가점검 · 서류 체크 (openRiskModal / renderRisks) -->
               <article id="card-clauses" class="bg-white rounded-3xl border border-ivory-border p-5 shadow-card flex flex-col justify-between transition-all">
                 <div>
                   <div class="flex items-center justify-between mb-3">
@@ -920,27 +926,29 @@
                       </span>
                       <h4 class="font-bold text-[16.5px] text-charcoal">위험물건 진단</h4>
                     </div>
-                    <span class="text-[12.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">안전 계약 AI</span>
+                    <span id="riskBadge" class="text-[12.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">진단 0건</span>
                   </div>
 
-                  <!-- 위험물건 즉시 진단기 -->
-                  <div class="p-3 rounded-2xl bg-ivory-subtle/80 border border-ivory-border space-y-2">
-                    <p class="text-[12.5px] font-bold text-charcoal">⚡ 보증금 · 선순위 채권 위험도 즉시 진단 (단위: 억)</p>
-                    <div class="grid grid-cols-3 gap-1.5">
-                      <input id="riskMarketInput" type="number" step="0.1" value="10.0" placeholder="매매시세" class="px-2.5 py-1.5 rounded-xl bg-white border border-ivory-border text-xs focus:outline-none focus:border-brand-orange" title="매매 시세(억)" />
-                      <input id="riskSeniorInput" type="number" step="0.1" value="2.0" placeholder="선순위채권" class="px-2.5 py-1.5 rounded-xl bg-white border border-ivory-border text-xs focus:outline-none focus:border-brand-orange" title="선순위 근저당(억)" />
-                      <input id="riskDepositInput" type="number" step="0.1" value="6.5" placeholder="임차보증금" class="px-2.5 py-1.5 rounded-xl bg-white border border-ivory-border text-xs focus:outline-none focus:border-brand-orange" title="임차 보증금(억)" />
+                  <div class="grid grid-cols-3 gap-1.5 text-center mb-2.5">
+                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
+                      <p class="text-base">💰</p><p class="text-[12px] font-semibold text-charcoal leading-tight">보증금<br/>회수 예상</p>
                     </div>
-                    <div id="riskResultOutput" class="text-[12.5px] p-2 rounded-xl bg-white border border-ivory-border text-charcoal leading-snug">
-                      진단 대기: 시세 10억 · 선순위 2억 · 보증금 6.5억 입력됨
+                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
+                      <p class="text-base">🛡️</p><p class="text-[12px] font-semibold text-charcoal leading-tight">HUG 보증<br/>자가점검</p>
+                    </div>
+                    <div class="p-2 rounded-2xl bg-ivory-bg border border-ivory-border/70">
+                      <p class="text-base">📋</p><p class="text-[12px] font-semibold text-charcoal leading-tight">등기·대장<br/>서류 체크</p>
                     </div>
                   </div>
+
+                  <!-- 저장한 진단 (renderRisks) -->
+                  <div id="riskList" class="space-y-1.5 text-xs"></div>
                 </div>
 
-                <div class="mt-3 pt-2.5 border-t border-ivory-border flex items-center justify-between">
-                  <span class="text-[12.5px] text-charcoal-light">시세 대비 보증금·선순위 채권 비율 점검</span>
-                  <button onclick="runRiskDiagnosis()" class="px-3.5 py-2 rounded-xl bg-charcoal hover:bg-black text-white text-xs font-semibold transition-colors">
-                    위험도 즉시 진단 실행
+                <div class="mt-3 pt-2.5 border-t border-ivory-border flex items-center justify-between gap-2">
+                  <span class="text-[12px] text-charcoal-light">참고용 추정 · 실제 경매·HUG 심사와 다를 수 있음</span>
+                  <button onclick="openRiskModal()" class="px-3.5 py-2 rounded-xl bg-charcoal hover:bg-black text-white text-xs font-semibold transition-colors shrink-0">
+                    + 새 위험 진단
                   </button>
                 </div>
               </article>
@@ -1325,6 +1333,161 @@
       </div>
     </div>
 
+    <!-- ==================== 모달: 위험물건 정밀 진단 ==================== -->
+    <div id="modal-risk" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] p-3 sm:p-4">
+      <div class="bg-white rounded-3xl border border-ivory-border w-full max-w-4xl shadow-xl max-h-full overflow-y-auto">
+        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-ivory-border px-5 py-3 flex items-center justify-between gap-2 rounded-t-3xl">
+          <div class="min-w-0">
+            <h3 class="text-base font-bold text-charcoal">🛡️ 위험물건 정밀 진단</h3>
+            <p class="text-[12px] text-charcoal-muted">금액 단위: <b>만 원</b> · 입력하면 오른쪽 결과가 바로 바뀝니다</p>
+          </div>
+          <button type="button" onclick="closeModal('modal-risk')" class="p-1.5 rounded-lg hover:bg-ivory-subtle text-charcoal-muted shrink-0" aria-label="닫기">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="riskForm" oninput="riskUpdate()" onchange="riskUpdate()" onsubmit="event.preventDefault(); saveRisk();" class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 왼쪽: 입력 -->
+          <div class="space-y-3 min-w-0">
+            <div class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border space-y-2">
+              <p class="text-xs font-bold text-charcoal">① 물건 정보</p>
+              <label class="block text-[12px] text-charcoal-muted">물건명
+                <input id="rk_title" type="text" list="rk_titles" maxlength="60" placeholder="예: 망원동 OO빌라 302호 전세" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                <datalist id="rk_titles"></datalist>
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="block text-[12px] text-charcoal-muted">주택 유형
+                  <select id="rk_type" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange">
+                    <option value="apt">아파트·오피스텔</option>
+                    <option value="villa">연립·다세대(빌라)</option>
+                    <option value="house">다가구·단독·다중주택</option>
+                  </select>
+                </label>
+                <label class="block text-[12px] text-charcoal-muted">지역 (소액임차인 기준)
+                  <select id="rk_region" onchange="riskRegionChanged()" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange">
+                    <option value="seoul">서울특별시</option>
+                    <option value="over">과밀억제권역·세종·용인·화성·김포</option>
+                    <option value="metro">광역시·안산·광주·파주·이천·평택</option>
+                    <option value="etc">그 밖의 지역</option>
+                  </select>
+                </label>
+              </div>
+              <label class="flex items-center gap-2 text-[12px] text-charcoal-muted cursor-pointer">
+                <input id="rk_capital" type="checkbox" class="w-3.5 h-3.5 accent-blue-500" /> 수도권(서울·인천·경기) 주택 — HUG 보증금 한도 판정용
+              </label>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border space-y-2">
+              <p class="text-xs font-bold text-charcoal">② 시세 · 보증금 · 선순위 채권</p>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="block text-[12px] text-charcoal-muted">매매 시세 (KB·실거래)
+                  <input id="rk_market" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_market" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+                <label class="block text-[12px] text-charcoal-muted">공시가격 (빌라·다가구 HUG용)
+                  <input id="rk_pub" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_pub" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+                <label class="block text-[12px] text-charcoal-muted">내 임차보증금
+                  <input id="rk_deposit" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_deposit" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+                <label class="block text-[12px] text-charcoal-muted">근저당 채권최고액 합계
+                  <input id="rk_mortgage" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_mortgage" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+              </div>
+              <label class="flex items-center gap-2 text-[12px] text-charcoal-muted cursor-pointer">
+                <input id="rk_mortEst" type="checkbox" class="w-3.5 h-3.5 accent-blue-500" /> 실제 대출원금으로 추정 (채권최고액 ÷ 1.2) — 끄면 최고액 그대로 (보수적)
+              </label>
+              <label class="block text-[12px] text-charcoal-muted">그 밖의 선순위 (체납 당해세·가압류 등)
+                  <input id="rk_other" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_other" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border space-y-2">
+              <p class="text-xs font-bold text-charcoal">③ 선순위 임차보증금 <span id="rk_seniorHelp" class="font-normal text-charcoal-muted"></span></p>
+              <label class="block text-[12px] text-charcoal-muted">확인된 선순위 보증금 합계 (확정일자 부여현황)
+                  <input id="rk_seniorDep" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_seniorDep" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+              <div id="rk_houseBox" class="space-y-2">
+                <p class="text-[12px] text-charcoal-muted">확인 전이라면 아래로 <b>추정</b>합니다 (위 칸이 비어 있을 때만 사용)</p>
+                <div class="grid grid-cols-3 gap-2">
+                  <label class="block text-[12px] text-charcoal-muted">총 방(호) 수
+                    <input id="rk_rooms" type="number" min="0" step="1" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  </label>
+                  <label class="block text-[12px] text-charcoal-muted">공실 수 (내 방 제외)
+                    <input id="rk_vacant" type="number" min="0" step="1" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  </label>
+                  <label class="block text-[12px] text-charcoal-muted">방당 평균 보증금
+                    <input id="rk_avgDep" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <details class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border">
+              <summary class="text-xs font-bold text-charcoal cursor-pointer">④ 경매 가정 (낙찰가율 · 비용)</summary>
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <label class="block text-[12px] text-charcoal-muted">예상 낙찰가율 (%)
+                  <input id="rk_bidRate" type="number" min="30" max="120" step="1" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                </label>
+                <label class="block text-[12px] text-charcoal-muted">경매 비용
+                  <input id="rk_cost" type="number" min="0" step="100" inputmode="numeric" class="w-full mt-0.5 px-2.5 py-2 rounded-xl bg-white border border-ivory-border text-xs text-charcoal focus:outline-none focus:border-brand-orange" />
+                  <span data-won="rk_cost" class="block text-[11.5px] text-charcoal-light mt-0.5 min-h-[14px]"></span>
+                </label>
+              </div>
+              <p class="text-[11.5px] text-charcoal-light mt-1">기본값: 아파트 85% · 빌라 75% · 다가구 75% (지역 법원 경매 통계에 맞게 조정)</p>
+            </details>
+
+            <div class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border space-y-1.5">
+              <p class="text-xs font-bold text-charcoal">⑤ 서류 체크 <span class="font-normal text-charcoal-muted">— 확인한 결과를 눌러 주세요</span></p>
+              <div id="rk_checks" class="space-y-1.5"></div>
+            </div>
+          </div>
+
+          <!-- 오른쪽: 결과 -->
+          <div class="space-y-3 min-w-0">
+            <div id="rk_grade" class="p-3.5 rounded-2xl border"></div>
+            <div class="p-3 rounded-2xl bg-white border border-ivory-border">
+              <p class="text-xs font-bold text-charcoal mb-1.5">💰 경매 시 보증금 회수 예상 (배당 순서)</p>
+              <div id="rk_sim" class="text-xs space-y-1"></div>
+            </div>
+            <div class="p-3 rounded-2xl bg-white border border-ivory-border">
+              <p class="text-xs font-bold text-charcoal mb-1.5">🛡️ HUG 전세보증금반환보증 자가점검</p>
+              <div id="rk_hug" class="text-xs space-y-1"></div>
+            </div>
+            <div class="p-3 rounded-2xl bg-white border border-ivory-border">
+              <p class="text-xs font-bold text-charcoal mb-1">🏦 전세대출 사전 확인 안내</p>
+              <p class="text-[12px] text-charcoal-muted leading-snug">은행별 가심사는 고객 신용·소득 정보가 필요하고 등록된 대출모집인만 할 수 있어 앱에서 직접 제공하지 않습니다. 아래 공식 창구에서 고객이 직접 확인하도록 안내하세요.</p>
+              <div class="flex flex-wrap gap-1.5 mt-2 text-[12px]">
+                <a href="https://enhuf.molit.go.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">기금e든든 (버팀목 자가진단)</a>
+                <a href="https://www.khug.or.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">HUG 주택도시보증공사</a>
+                <a href="https://www.hf.go.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">한국주택금융공사</a>
+                <a href="https://www.iros.go.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">인터넷등기소</a>
+                <a href="https://www.eais.go.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">세움터 (건축물대장)</a>
+                <a href="https://www.gov.kr" target="_blank" rel="noopener" class="px-2 py-1 rounded-lg bg-ivory-subtle hover:bg-ivory-border font-semibold text-charcoal">정부24 (전입세대·확정일자)</a>
+              </div>
+              <button type="button" onclick="copyLoanGuide()" class="mt-2 w-full py-2 rounded-xl bg-ivory-subtle hover:bg-charcoal hover:text-white text-charcoal text-xs font-semibold transition-colors">📋 고객용 전세대출 준비 안내 문자 복사</button>
+            </div>
+
+            <details class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border">
+              <summary class="text-xs font-bold text-charcoal cursor-pointer">⚙️ 진단 기준 (법령·HUG 기준이 바뀌면 여기서 수정)</summary>
+              <div id="rk_cfg" class="mt-2 space-y-2 text-[12px] text-charcoal-muted"></div>
+            </details>
+          </div>
+
+          <div class="md:col-span-2 flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-ivory-border">
+            <p class="mr-auto text-[11.5px] text-charcoal-light">참고용 추정입니다. 실제 배당·보증 심사·대출 결과와 다를 수 있으며 최종 판단은 서류 원본과 각 기관 심사로 확인하세요.</p>
+            <button type="button" onclick="copyRiskReport()" class="px-4 py-2 rounded-xl bg-ivory-subtle hover:bg-ivory-border text-charcoal text-xs font-semibold">📋 고객 설명용 요약 복사</button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white text-xs font-semibold">진단 저장</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- ==================== 모달: 설정 · 데이터 백업/복원 ==================== -->
     <div id="modal-settings" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] p-4">
       <div class="bg-white rounded-3xl border border-ivory-border w-full max-w-sm p-5 shadow-xl space-y-3.5 max-h-full overflow-y-auto">
@@ -1487,8 +1650,8 @@
         }
       };
     }
-    const LIST_KEYS = ['listings', 'tours', 'clients', 'reminders', 'contracts', 'leases', 'fees'];
-    const EMPTY_DATA = () => Object.assign({ v: DATA_VERSION, chat: [], checks: {}, notifCleared: false }, seedItems());
+    const LIST_KEYS = ['listings', 'tours', 'clients', 'reminders', 'contracts', 'leases', 'fees', 'risks'];
+    const EMPTY_DATA = () => Object.assign({ v: DATA_VERSION, chat: [], checks: {}, notifCleared: false, risks: [] }, seedItems());
 
     // 저장 형식 맞추기 (예전 버전: 샘플은 화면에 고정 + 추가한 기록만 records 에 저장)
     function migrateData(saved) {
@@ -1996,30 +2159,367 @@
 
     // ==================== 위험물건 자동 진단 ====================
 
-    function runRiskDiagnosis() {
-      const market = parseFloat(document.getElementById('riskMarketInput').value) || 0;
-      const senior = parseFloat(document.getElementById('riskSeniorInput').value) || 0;
-      const deposit = parseFloat(document.getElementById('riskDepositInput').value) || 0;
-      const outEl = document.getElementById('riskResultOutput');
+    // ==================== 위험물건 정밀 진단 ====================
+    // ① 경매 배당 순서로 보증금 회수 예상  ② HUG 전세보증 가입 자가점검  ③ 등기·대장 서류 체크
+    // 모든 금액 단위: 만 원 · 참고용 추정 (실제 배당·심사와 다를 수 있음)
+    const RISK_CFG_DEFAULT = {
+      hugRatio: 90,        // HUG: (선순위채권 + 보증금) ≤ 주택가격의 90%
+      hugPubRate: 140,     // HUG: 공시가격 적용비율 (공시가격 × 140%)
+      hugSeniorMax: 60,    // HUG: 선순위채권 ≤ 주택가격의 60%
+      hugLimitCap: 70000,  // HUG 보증금 한도: 수도권 7억
+      hugLimitEtc: 50000,  //                 그 외 5억
+      bid: { apt: 85, villa: 75, house: 75 }, // 예상 낙찰가율(%)
+      cost: 500,           // 경매 비용
+      // 소액임차인 최우선변제 [보증금 기준, 우선변제 금액] (주택임대차보호법 시행령, 2023.2.21. 이후 담보물권 설정분)
+      small: { seoul: [16500, 5500], over: [14500, 4800], metro: [8500, 2800], etc: [7500, 2500] }
+    };
+    const RISK_REGION = { seoul: '서울', over: '과밀억제권역 등', metro: '광역시 등', etc: '그 밖의 지역' };
+    const RISK_TYPE = { apt: '아파트·오피스텔', villa: '연립·다세대', house: '다가구·단독·다중주택' };
+    const RISK_CHECKS = [
+      { k: 'trust', fatal: true, label: '신탁등기 여부 (등기부 갑구)', bad: '신탁등기 있음 — 수탁자(신탁사) 동의 없는 임대차는 보호받기 어려움' },
+      { k: 'seizure', fatal: true, label: '압류·가압류·가처분·경매개시결정', bad: '압류·가압류 등 권리제한 있음' },
+      { k: 'leaseReg', fatal: true, label: '임차권등기명령 이력 (보증금 미반환 이력)', bad: '임차권등기명령 이력 있음 — 이전 임차인 보증금 미반환' },
+      { k: 'owner', fatal: true, label: '등기부 소유자 = 계약 임대인 (신분증 대조)', bad: '소유자와 계약 임대인 불일치' },
+      { k: 'illegal', fatal: true, label: '건축물대장 위반건축물 · 주택 용도 확인', bad: '위반건축물·근린생활시설 — HUG 보증 거절 사유' },
+      { k: 'tax', fatal: true, label: '임대인 국세·지방세 완납 (미납세금 열람)', bad: '임대인 세금 체납 — 당해세는 보증금보다 먼저 배당' },
+      { k: 'moveIn', fatal: false, label: '전입세대확인서 (기존 전입자 확인)', bad: '확인되지 않은 선순위 전입자 있음' },
+      { k: 'fixedDate', fatal: false, label: '확정일자 부여현황 (다가구 선순위 보증금)', bad: '선순위 보증금이 입력값보다 많음 — 금액 다시 입력' },
+      { k: 'clause', fatal: false, label: '근저당 말소·감액 · 잔금일까지 권리변동 금지 특약', bad: '특약 협의 불가' }
+    ];
+    let riskEditId = null;
 
-      if (market <= 0) {
-        outEl.innerHTML = '⚠️ 매매 시세를 0보다 크게 입력해 주세요.';
-        return;
-      }
-
-      const ratio = ((senior + deposit) / market) * 100;
-      if (ratio <= 70) {
-        outEl.className = 'text-[12.5px] p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 leading-snug';
-        outEl.innerHTML = `✅ <strong>안전 구간 (부채비율 ${ratio.toFixed(1)}%)</strong> · 전세보증보험 가입 양호 예상 (단, 건축물대장 위반건축물 여부 확인 필수)`;
-      } else if (ratio <= 80) {
-        outEl.className = 'text-[12.5px] p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 leading-snug';
-        outEl.innerHTML = `⚠️ <strong>주의 구간 (부채비율 ${ratio.toFixed(1)}%)</strong> · 선순위 근저당 잔금일 동시 말소 조건 특약 삽입 권장`;
-      } else {
-        outEl.className = 'text-[12.5px] p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 leading-snug';
-        outEl.innerHTML = `🚨 <strong>고위험 경고 (부채비율 ${ratio.toFixed(1)}%)</strong> · 깡통전세 및 보증보험 거절 위험 높음 · 선순위 감액 조건 필수`;
-      }
-      showToast(`위험물건 진단 완료 (부채비율 ${ratio.toFixed(1)}%)`);
+    function riskCfg() {
+      const c = userData.riskCfg || {};
+      const d = RISK_CFG_DEFAULT;
+      return Object.assign({}, d, c, { bid: Object.assign({}, d.bid, c.bid), small: Object.assign({}, d.small, c.small) });
     }
+    function won(v) {
+      v = Math.round(Number(v) || 0);
+      const neg = v < 0; v = Math.abs(v);
+      const eok = Math.floor(v / 10000), man = v % 10000;
+      if (!v) return '0원';
+      const t = eok ? `${eok}억${man ? ' ' + man.toLocaleString() + '만' : ''}` : `${man.toLocaleString()}만`;
+      return (neg ? '-' : '') + t + ' 원';
+    }
+    const rkVal = id => document.getElementById(id);
+    function riskInputs() {
+      const n = id => Math.max(0, Number(rkVal(id).value) || 0);
+      const checks = {};
+      document.querySelectorAll('#rk_checks [data-ck]').forEach(row => { checks[row.dataset.ck] = Number(row.dataset.v) || 0; });
+      return {
+        title: rkVal('rk_title').value.trim(), type: rkVal('rk_type').value, region: rkVal('rk_region').value,
+        capital: rkVal('rk_capital').checked, market: n('rk_market'), pub: n('rk_pub'), deposit: n('rk_deposit'),
+        mortgage: n('rk_mortgage'), mortEst: rkVal('rk_mortEst').checked, other: n('rk_other'),
+        seniorDep: n('rk_seniorDep'), rooms: n('rk_rooms'), vacant: n('rk_vacant'), avgDep: n('rk_avgDep'),
+        bidRate: rkVal('rk_bidRate').value === '' ? null : n('rk_bidRate'),
+        cost: rkVal('rk_cost').value === '' ? null : n('rk_cost'), checks
+      };
+    }
+
+    // ---------- 계산 ----------
+    function riskCalc(p, cfg) {
+      const mort = p.mortEst ? Math.round(p.mortgage / 1.2) : p.mortgage;
+      // 선순위 임차보증금: 확인된 금액 우선, 없으면 다가구는 (총 방 - 내 방 - 공실) × 평균 보증금
+      let seniorDep = p.seniorDep, seniorCount = p.seniorDep > 0 ? 1 : 0, estimated = false;
+      if (p.type === 'house') {
+        const others = Math.max(0, p.rooms - 1 - p.vacant);
+        if (!seniorDep && others && p.avgDep) { seniorDep = others * p.avgDep; estimated = true; }
+        if (others) seniorCount = others;
+      }
+      const avgSenior = seniorCount ? seniorDep / seniorCount : 0;
+      const bidRate = p.bidRate != null && p.bidRate > 0 ? p.bidRate : cfg.bid[p.type];
+      const cost = p.cost != null ? p.cost : cfg.cost;
+      const [smallLimit, smallPrior] = cfg.small[p.region] || cfg.small.etc;
+
+      function sim(rate) {
+        const price = p.market * rate / 100;
+        let pool = Math.max(0, price - cost);
+        // 최우선변제: 소액임차인 보증금 중 일정액, 합계는 낙찰가의 1/2 이내
+        const mySmall = p.deposit > 0 && p.deposit <= smallLimit ? Math.min(p.deposit, smallPrior) : 0;
+        const otherEach = seniorCount && avgSenior > 0 && avgSenior <= smallLimit ? Math.min(avgSenior, smallPrior) : 0;
+        const smallSum = mySmall + otherEach * seniorCount;
+        const k = smallSum > price / 2 ? (price / 2) / smallSum : 1;
+        const myPrior = mySmall * k, othersPrior = otherEach * seniorCount * k;
+        const take = amt => { const t = Math.max(0, Math.min(pool, amt)); pool -= t; return t; };
+        const steps = [];
+        const add = (label, need, got, mine) => steps.push({ label, need, got, mine });
+        add('경매 비용', cost, Math.min(cost, price));
+        const a = take(myPrior); if (myPrior) add('내 보증금 최우선변제 (소액임차인)', myPrior, a, true);
+        const b = take(othersPrior); if (othersPrior) add('다른 소액임차인 최우선변제', othersPrior, b);
+        const c = take(p.other); if (p.other) add('당해세·가압류 등 선순위', p.other, c);
+        const d = take(mort); if (mort) add(p.mortEst ? '선순위 근저당 (추정 원금)' : '선순위 근저당 (채권최고액)', mort, d);
+        const e = take(seniorDep - othersPrior); if (seniorDep) add(estimated ? '선순위 임차보증금 (추정)' : '선순위 임차보증금', seniorDep - othersPrior, e);
+        const f = take(p.deposit - myPrior); add('내 보증금 (나머지)', p.deposit - myPrior, f, true);
+        const recovered = a + f;
+        return { rate, price, recovered, ratio: p.deposit ? recovered / p.deposit * 100 : null, loss: Math.max(0, p.deposit - recovered), steps };
+      }
+      const base = p.market ? sim(bidRate) : null;
+      const stress = p.market ? sim(Math.max(1, bidRate - 10)) : null;
+      const debtRatio = p.market ? (p.mortgage + p.other + seniorDep + p.deposit) / p.market * 100 : null;
+
+      // HUG 자가점검
+      let hugPrice = 0, hugSrc = '', hugApprox = false;
+      if (p.type === 'apt' && p.market) { hugPrice = p.market; hugSrc = '시세'; }
+      else if (p.pub) { hugPrice = p.pub * cfg.hugPubRate / 100; hugSrc = `공시가격 × ${cfg.hugPubRate}%`; }
+      else if (p.market) { hugPrice = p.market; hugSrc = '시세 (공시가격 미입력 — 참고값)'; hugApprox = true; }
+      const hugSenior = p.mortgage + p.other + seniorDep;
+      const limit = p.capital ? cfg.hugLimitCap : cfg.hugLimitEtc;
+      const cap90 = hugPrice * cfg.hugRatio / 100;
+      const hugMax = Math.max(0, Math.min(limit, cap90 - hugSenior));
+      const ck = p.checks || {};
+      const conds = [
+        { ok: p.deposit <= limit, text: `보증금 ${won(p.deposit)} ≤ 한도 ${won(limit)} (${p.capital ? '수도권' : '수도권 외'})` },
+        { ok: hugSenior + p.deposit <= cap90, text: `선순위 ${won(hugSenior)} + 보증금 ≤ 주택가격의 ${cfg.hugRatio}% (${won(cap90)})` },
+        { ok: hugSenior <= hugPrice * cfg.hugSeniorMax / 100, text: `선순위채권 ≤ 주택가격의 ${cfg.hugSeniorMax}% (${won(hugPrice * cfg.hugSeniorMax / 100)})` },
+        { ok: ck.illegal !== 2, unknown: ck.illegal !== 1, text: '위반건축물 아님 · 주택 용도' },
+        { ok: ck.trust !== 2 && ck.seizure !== 2, unknown: ck.trust !== 1 || ck.seizure !== 1, text: '신탁·압류·가압류 없음' }
+      ];
+      let hug = 'none';
+      if (hugPrice && p.deposit) {
+        if (conds.some(c => !c.ok)) hug = 'hard';
+        else if (hugApprox || conds.some(c => c.unknown) || hugSenior + p.deposit > cap90 * 0.95) hug = 'edge';
+        else hug = 'ok';
+      }
+
+      // 서류 체크
+      const fatal = RISK_CHECKS.filter(c => ck[c.k] === 2 && c.fatal);
+      const warnDocs = RISK_CHECKS.filter(c => ck[c.k] === 2 && !c.fatal);
+      const unchecked = RISK_CHECKS.filter(c => !ck[c.k]).length;
+
+      // 종합 등급
+      let grade = 'none';
+      if (base && p.deposit) {
+        if (fatal.length || base.ratio < 100 || hug === 'hard' && base.ratio < 100) grade = 'danger';
+        else if (stress.ratio < 100 || hug === 'hard' || hug === 'edge' || debtRatio > 70 || warnDocs.length) grade = 'warn';
+        else grade = 'safe';
+      } else if (fatal.length) grade = 'danger';
+      return { mort, seniorDep, estimated, seniorCount, bidRate, cost, smallLimit, smallPrior, base, stress, debtRatio,
+        hug, hugPrice, hugSrc, hugMax, hugSenior, limit, conds, fatal, warnDocs, unchecked, grade };
+    }
+
+    const GRADE_UI = {
+      danger: ['🚨 고위험', 'bg-rose-50 border-rose-200 text-rose-900', 'bg-rose-100 text-rose-800'],
+      warn: ['⚠️ 주의', 'bg-amber-50 border-amber-200 text-amber-900', 'bg-amber-100 text-amber-900'],
+      safe: ['✅ 안전', 'bg-emerald-50 border-emerald-200 text-emerald-900', 'bg-emerald-50 text-emerald-700'],
+      none: ['입력 대기', 'bg-ivory-bg border-ivory-border text-charcoal', 'bg-ivory-subtle text-charcoal-muted']
+    };
+    const HUG_UI = { ok: '가입 가능성 높음', edge: '경계 · 추가 확인 필요', hard: '가입 어려움', none: '입력 대기' };
+    function riskSummary(r) {
+      if (!r.base) return '시세·보증금 입력 필요';
+      return `회수 예상 ${Math.round(r.base.ratio)}% · HUG ${HUG_UI[r.hug]}` + (r.unchecked ? ` · 서류 미확인 ${r.unchecked}건` : '');
+    }
+
+    // ---------- 화면 ----------
+    function riskUpdate() {
+      const p = riskInputs();
+      const cfg = riskCfg();
+      const r = riskCalc(p, cfg);
+      // 입력칸 아래 '6억 5,000만 원' 표시
+      document.querySelectorAll('#riskForm [data-won]').forEach(el => {
+        const v = Number(rkVal(el.dataset.won).value) || 0;
+        el.textContent = v ? won(v) : '';
+      });
+      rkVal('rk_houseBox').classList.toggle('hidden', p.type !== 'house');
+      rkVal('rk_seniorHelp').textContent = p.type === 'house'
+        ? '— 다가구는 건물 전체가 하나의 등기라 다른 방 보증금이 내 보증금보다 앞설 수 있어요'
+        : p.type === 'villa'
+          ? '— 다세대는 호실별 등기라 다른 호실 보증금은 영향 없음 · 이 호실의 기존 전입 임차인만 입력'
+          : '— 이 호실에 먼저 전입한 임차인이 있으면 입력';
+      rkVal('rk_bidRate').placeholder = `기본 ${cfg.bid[p.type]}`;
+      rkVal('rk_cost').placeholder = `기본 ${cfg.cost}`;
+
+      // 종합 등급
+      const g = GRADE_UI[r.grade];
+      const reasons = [];
+      r.fatal.forEach(c => reasons.push('🚨 ' + c.bad));
+      if (r.base && p.deposit) {
+        if (r.base.ratio < 100) reasons.push(`경매 시 보증금 약 ${won(r.base.loss)} 손실 예상`);
+        else if (r.stress.ratio < 100) reasons.push(`낙찰가율이 ${r.stress.rate}%로 떨어지면 ${won(r.stress.loss)} 손실 가능`);
+        if (r.debtRatio > 70) reasons.push(`부채비율 ${r.debtRatio.toFixed(1)}% (70% 초과 시 주의)`);
+        if (r.hug === 'hard') reasons.push('HUG 보증 가입 기준 미충족');
+        if (r.estimated) reasons.push('선순위 보증금은 추정값 — 확정일자 부여현황으로 확인 필요');
+      }
+      r.warnDocs.forEach(c => reasons.push('⚠️ ' + c.bad));
+      if (r.unchecked) reasons.push(`서류 체크 ${r.unchecked}건 미확인`);
+      const box = rkVal('rk_grade');
+      box.className = `p-3.5 rounded-2xl border ${g[1]}`;
+      box.innerHTML = `<div class="flex items-center justify-between gap-2">
+          <p class="text-[17px] font-extrabold">${g[0]}</p>
+          ${r.debtRatio != null ? `<span class="text-[12px] font-bold">부채비율 ${r.debtRatio.toFixed(1)}%</span>` : ''}
+        </div>
+        ${r.base && p.deposit ? `<p class="text-xs mt-1">보증금 ${won(p.deposit)} 중 <b>${won(r.base.recovered)}</b> 회수 예상 (<b>${Math.round(r.base.ratio)}%</b>) · HUG <b>${HUG_UI[r.hug]}</b></p>` : '<p class="text-xs mt-1">매매 시세와 내 보증금을 입력하세요.</p>'}
+        ${reasons.length ? `<ul class="mt-1.5 text-[12px] space-y-0.5">${reasons.map(x => `<li>· ${escapeHtml(x)}</li>`).join('')}</ul>` : ''}`;
+
+      // 배당 시뮬레이션
+      rkVal('rk_sim').innerHTML = r.base && p.deposit ? `
+        <p class="text-charcoal-muted">예상 낙찰가 <b class="text-charcoal">${won(r.base.price)}</b> (시세 × ${r.bidRate}%)</p>
+        <div class="space-y-1 mt-1">${r.base.steps.map((st, i) => `
+          <div class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg ${st.mine ? 'bg-brand-orangeSoft/70' : 'bg-ivory-bg'}">
+            <span class="min-w-0 truncate ${st.mine ? 'font-bold text-brand-orange' : 'text-charcoal'}">${i + 1}. ${st.label}</span>
+            <span class="shrink-0 ${st.got + 0.5 < st.need ? 'text-rose-600 font-bold' : 'text-charcoal'}">${won(st.got)}${st.got + 0.5 < st.need ? ` / ${won(st.need)}` : ''}</span>
+          </div>`).join('')}</div>
+        <p class="mt-1.5"><b>${r.base.ratio >= 100 ? '✅ 보증금 전액 회수 예상' : `🚨 ${won(r.base.loss)} 손실 예상`}</b>
+          <span class="text-charcoal-muted"> · 낙찰가율 ${r.stress.rate}%(−10%p)이면 ${Math.round(r.stress.ratio)}% 회수</span></p>
+        <p class="text-[11.5px] text-charcoal-light leading-snug">소액임차인 기준(${RISK_REGION[p.region]}): 보증금 ${won(r.smallLimit)} 이하 → ${won(r.smallPrior)}까지 최우선변제. 단, 근저당 설정 당시 기준이 적용되므로 오래된 근저당이 있으면 이보다 적을 수 있어요. 선순위 보증금은 내 보증금보다 앞선다고 보수적으로 가정했습니다.</p>`
+        : '<p class="text-charcoal-muted">매매 시세와 내 보증금을 입력하면 배당 순서대로 계산합니다.</p>';
+
+      // HUG
+      rkVal('rk_hug').innerHTML = r.hug !== 'none' ? `
+        <p><span class="px-2 py-0.5 rounded font-bold ${r.hug === 'ok' ? 'bg-emerald-50 text-emerald-700' : r.hug === 'edge' ? 'bg-amber-100 text-amber-900' : 'bg-rose-100 text-rose-800'}">${HUG_UI[r.hug]}</span></p>
+        <p class="text-charcoal-muted mt-1">주택가격 <b class="text-charcoal">${won(r.hugPrice)}</b> (${escapeHtml(r.hugSrc)}) · 보증 가능 최대 보증금 약 <b class="text-charcoal">${won(r.hugMax)}</b></p>
+        <ul class="space-y-0.5 mt-1">${r.conds.map(c => `<li>${!c.ok ? '❌' : c.unknown ? '❔' : '✅'} ${escapeHtml(c.text)}${c.ok && c.unknown ? ' <span class="text-charcoal-light">(서류 미확인)</span>' : ''}</li>`).join('')}</ul>
+        <p class="text-[11.5px] text-charcoal-light leading-snug mt-1">HUG 실제 심사는 시세 산정 방식·임대인 이력 등으로 달라질 수 있어요. 최종 가입 여부는 HUG 또는 위탁 은행에서 확인하세요.</p>`
+        : '<p class="text-charcoal-muted">시세(빌라·다가구는 공시가격)와 보증금을 입력하세요.</p>';
+    }
+
+    function renderRiskChecks(values) {
+      rkVal('rk_checks').innerHTML = RISK_CHECKS.map(c => {
+        const v = values[c.k] || 0;
+        const btn = (val, text, on) => `<button type="button" data-set="${val}" onclick="setRiskCheck(this)" class="px-1.5 py-0.5 rounded-md text-[11.5px] font-bold border ${v === val ? on : 'bg-white border-ivory-border text-charcoal-light'}">${text}</button>`;
+        return `<div data-ck="${c.k}" data-v="${v}" class="flex items-center justify-between gap-2">
+          <span class="text-[12px] ${v === 2 ? 'text-rose-700 font-semibold' : 'text-charcoal'} min-w-0">${c.fatal ? '' : '<span class="text-charcoal-light">(확인)</span> '}${escapeHtml(c.label)}</span>
+          <div class="flex gap-1 shrink-0">${btn(0, '미확인', 'bg-ivory-subtle border-ivory-border text-charcoal')}${btn(1, '이상없음', 'bg-emerald-50 border-emerald-300 text-emerald-700')}${btn(2, '문제있음', 'bg-rose-50 border-rose-300 text-rose-700')}</div>
+        </div>`;
+      }).join('');
+    }
+    function setRiskCheck(btn) {
+      const row = btn.closest('[data-ck]');
+      const vals = riskInputs().checks;
+      vals[row.dataset.ck] = Number(btn.dataset.set);
+      renderRiskChecks(vals);
+      riskUpdate();
+    }
+    function riskRegionChanged() {
+      rkVal('rk_capital').checked = ['seoul', 'over'].includes(rkVal('rk_region').value);
+    }
+
+    function renderRiskCfg() {
+      const c = riskCfg();
+      const f = (key, label, val, step = 1) => `<label class="flex items-center justify-between gap-2">${label}
+          <input type="number" step="${step}" min="0" data-cfg="${key}" value="${val}" class="w-24 px-2 py-1 rounded-lg bg-white border border-ivory-border text-xs text-right text-charcoal" /></label>`;
+      rkVal('rk_cfg').innerHTML = `
+        <p class="font-bold text-charcoal">HUG 전세보증금반환보증</p>
+        ${f('hugRatio', '선순위+보증금 한도 (주택가격의 %)', c.hugRatio)}
+        ${f('hugPubRate', '공시가격 적용비율 (%)', c.hugPubRate)}
+        ${f('hugSeniorMax', '선순위채권 한도 (주택가격의 %)', c.hugSeniorMax)}
+        ${f('hugLimitCap', '보증금 한도 · 수도권 (만 원)', c.hugLimitCap, 100)}
+        ${f('hugLimitEtc', '보증금 한도 · 그 외 (만 원)', c.hugLimitEtc, 100)}
+        <p class="font-bold text-charcoal pt-1">경매 가정</p>
+        ${f('bid.apt', '낙찰가율 · 아파트 (%)', c.bid.apt)}
+        ${f('bid.villa', '낙찰가율 · 빌라 (%)', c.bid.villa)}
+        ${f('bid.house', '낙찰가율 · 다가구 (%)', c.bid.house)}
+        ${f('cost', '경매 비용 (만 원)', c.cost, 50)}
+        <p class="font-bold text-charcoal pt-1">소액임차인 최우선변제 (보증금 기준 / 우선변제액, 만 원)</p>
+        ${Object.keys(RISK_REGION).map(k => `<div class="flex items-center justify-between gap-2">${RISK_REGION[k]}
+          <span class="flex gap-1"><input type="number" step="100" min="0" data-cfg="small.${k}.0" value="${c.small[k][0]}" class="w-20 px-2 py-1 rounded-lg bg-white border border-ivory-border text-xs text-right text-charcoal" />
+          <input type="number" step="100" min="0" data-cfg="small.${k}.1" value="${c.small[k][1]}" class="w-20 px-2 py-1 rounded-lg bg-white border border-ivory-border text-xs text-right text-charcoal" /></span></div>`).join('')}
+        <div class="flex gap-1.5 pt-1">
+          <button type="button" onclick="saveRiskCfg()" class="flex-1 py-1.5 rounded-lg bg-charcoal text-white text-xs font-semibold">기준 저장</button>
+          <button type="button" onclick="resetRiskCfg()" class="px-3 py-1.5 rounded-lg bg-white border border-ivory-border text-xs font-semibold text-charcoal">기본값</button>
+        </div>`;
+    }
+    function saveRiskCfg() {
+      const c = JSON.parse(JSON.stringify(riskCfg()));
+      document.querySelectorAll('#rk_cfg [data-cfg]').forEach(inp => {
+        const v = Number(inp.value);
+        if (!(v >= 0)) return;
+        const path = inp.dataset.cfg.split('.');
+        let o = c;
+        path.slice(0, -1).forEach(k => { o = o[k]; });
+        o[path[path.length - 1]] = v;
+      });
+      userData.riskCfg = c;
+      saveData();
+      riskUpdate();
+      showToast('⚙️ 진단 기준을 저장했습니다.');
+    }
+    function resetRiskCfg() {
+      delete userData.riskCfg;
+      saveData();
+      renderRiskCfg();
+      riskUpdate();
+      showToast('진단 기준을 기본값으로 되돌렸습니다.');
+    }
+
+    function openRiskModal(id) {
+      const item = id ? findItem('risks', id) : null;
+      riskEditId = item ? item.id : null;
+      const p = item ? item.inp : { type: 'villa', region: 'seoul', capital: true, mortEst: false, checks: {} };
+      const set = (k, v) => { rkVal('rk_' + k).value = v == null || v === 0 && k !== 'title' ? '' : v; };
+      set('title', p.title || ''); rkVal('rk_type').value = p.type || 'villa'; rkVal('rk_region').value = p.region || 'seoul';
+      rkVal('rk_capital').checked = p.capital !== false; rkVal('rk_mortEst').checked = !!p.mortEst;
+      ['market', 'pub', 'deposit', 'mortgage', 'other', 'seniorDep', 'rooms', 'vacant', 'avgDep', 'bidRate', 'cost'].forEach(k => set(k, p[k]));
+      if (p.bidRate === 0) rkVal('rk_bidRate').value = '';
+      rkVal('rk_titles').innerHTML = userData.listings.map(l => `<option value="${escapeHtml(l.title + (l.deal ? ' · ' + l.deal : ''))}"></option>`).join('');
+      renderRiskChecks(p.checks || {});
+      renderRiskCfg();
+      riskUpdate();
+      openModal('modal-risk');
+      if (window.lucide) lucide.createIcons();
+    }
+    function saveRisk() {
+      const inp = riskInputs();
+      const r = riskCalc(inp, riskCfg());
+      if (!inp.title) { showToast('⚠️ 물건명을 입력해 주세요.'); rkVal('rk_title').focus(); return; }
+      const rec = { id: riskEditId || newRecordId(), title: inp.title, date: todayKey(), inp, grade: r.grade, summary: riskSummary(r) };
+      const old = riskEditId && findItem('risks', riskEditId);
+      if (old) Object.assign(old, rec);
+      else userData.risks.unshift(rec);
+      riskEditId = rec.id;
+      saveData();
+      refreshKind('risks');
+      showToast(`🛡️ '${escapeHtml(inp.title)}' 진단을 ${old ? '수정' : '저장'}했습니다. (${GRADE_UI[r.grade][0]})`);
+    }
+    function riskReportText() {
+      const p = riskInputs(); const r = riskCalc(p, riskCfg());
+      const lines = [`${officeTag()} ${p.title || '계약 예정 물건'} 보증금 안전성 점검 결과`, `■ 종합: ${GRADE_UI[r.grade][0]}`];
+      if (r.base && p.deposit) {
+        lines.push(`■ 보증금 ${won(p.deposit)} · 시세 ${won(p.market)} · 부채비율 ${r.debtRatio.toFixed(1)}%`);
+        lines.push(`■ 경매 시 회수 예상: ${won(r.base.recovered)} (${Math.round(r.base.ratio)}%, 낙찰가율 ${r.bidRate}% 가정)`);
+        lines.push(`■ HUG 전세보증 자가점검: ${HUG_UI[r.hug]} (보증 가능 최대 보증금 약 ${won(r.hugMax)})`);
+      }
+      const done = RISK_CHECKS.filter(c => p.checks[c.k] === 1).map(c => c.label.replace(/\s*\(.*\)$/, ''));
+      const bad = RISK_CHECKS.filter(c => p.checks[c.k] === 2).map(c => c.bad);
+      const todo = RISK_CHECKS.filter(c => !p.checks[c.k]).map(c => c.label.replace(/\s*\(.*\)$/, ''));
+      if (done.length) lines.push(`■ 확인 완료: ${done.join(', ')}`);
+      if (bad.length) lines.push(`■ 주의 사항: ${bad.join(' / ')}`);
+      if (todo.length) lines.push(`■ 추가 확인 예정: ${todo.join(', ')}`);
+      lines.push('※ 공개 기준에 따른 참고용 추정이며, 실제 배당·보증 심사 결과와 다를 수 있습니다.');
+      return lines.join('\n');
+    }
+    function copyRiskReport() { copyTextToClipboard(riskReportText(), '고객 설명용 진단 요약을 복사했습니다.'); }
+    function copyLoanGuide() {
+      const msg = `${officeTag()} 전세대출 사전 준비 안내드립니다.
+1) 대출 가능 여부·한도: 이용하실 은행 앱 또는 '기금e든든(enhuf.molit.go.kr)' 자가진단으로 먼저 확인해 주세요. (버팀목·청년·신혼부부 전세자금은 소득·자산·무주택 요건이 있습니다)
+2) 준비 서류: 신분증, 주민등록등본, 임대차계약서(확정일자), 계약금 영수증, 재직·소득 증빙(근로소득원천징수영수증 등), 건강보험 자격득실확인서
+3) 전세보증보험(HUG 등) 가입 가능 여부도 함께 확인하시면 좋습니다.
+4) 대출 실행일은 잔금일에 맞춰 은행과 미리 협의해 주세요.
+궁금하신 점은 ${officeName()}(으)로 편하게 연락 주세요.`;
+      copyTextToClipboard(msg, '고객용 전세대출 준비 안내를 복사했습니다.');
+    }
+
+    function renderRisks() {
+      const list = userData.risks || (userData.risks = []);
+      const danger = list.filter(x => x.grade === 'danger').length;
+      const badge = document.getElementById('riskBadge');
+      badge.textContent = danger ? `고위험 ${danger}건` : `진단 ${list.length}건`;
+      badge.className = `text-[12.5px] font-bold px-2.5 py-0.5 rounded-full ${danger ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`;
+      const w = listWindow('risks', 'riskList', list, x => joinText(x.title, x.summary, GRADE_UI[x.grade] && GRADE_UI[x.grade][0]), '진단 검색 (물건명)');
+      document.getElementById('riskList').innerHTML = w.shown.length
+        ? w.shown.map(x => {
+            const g = GRADE_UI[x.grade] || GRADE_UI.none;
+            return `
+          <div class="p-2.5 rounded-2xl bg-ivory-bg border border-ivory-border/60 flex items-center justify-between gap-2 cursor-pointer hover:border-brand-orange transition-colors" data-id="${escapeHtml(x.id)}" onclick="openRiskModal(this.dataset.id)">
+            <div class="min-w-0">
+              <p class="font-bold text-charcoal truncate"><span class="text-[11.5px] font-bold px-1.5 py-0.5 rounded ${g[2]} mr-1">${g[0]}</span>${escapeHtml(x.title)}</p>
+              <p class="text-[12px] text-charcoal-muted truncate mt-0.5">${escapeHtml(x.summary || '')} · ${escapeHtml(x.date || '')}</p>
+            </div>
+            ${itemActions('risks', x.id)}
+          </div>`;
+          }).join('')
+        : listEmpty(w.q, '저장한 진단이 없습니다. + 새 위험 진단으로 계약 전 물건을 점검하세요.');
+    }
+
 
     // ==================== 임대차 3법 만기 안내 & 잔금 안내 복사 ====================
     function copyLeaseNotice(targetName, role) {
@@ -2043,7 +2543,7 @@
 
     // ==================== 실시간 중개 데이터 연동 (매물 등록 / 투어 추가 / 마케팅 생성) ====================
     // ---------- 카드 항목 그리기 ----------
-    const KIND_LABEL = { listings: '매물', tours: '투어 일정', clients: '고객', reminders: '리마인드', contracts: '계약', leases: '임대차', fees: '중개보수' };
+    const KIND_LABEL = { listings: '매물', tours: '투어 일정', clients: '고객', reminders: '리마인드', contracts: '계약', leases: '임대차', fees: '중개보수', risks: '위험 진단' };
     function findItem(kind, id) { return (userData[kind] || []).find(x => String(x.id) === String(id)); }
     function itemActions(kind, id) {
       const a = `data-kind="${kind}" data-id="${escapeHtml(id)}"`;
@@ -2055,6 +2555,70 @@
     function emptyRow(text) {
       return `<p class="text-[12.5px] text-charcoal-light text-center py-3 rounded-2xl border border-dashed border-ivory-border">${text}</p>`;
     }
+    // ---------- 긴 목록: 처음 5건만 · 검색 · 더보기 ----------
+    // 항목이 많아져도 카드가 끝없이 길어지지 않게, 카드에는 앞의 5건만 보이고
+    // 검색창(6건 이상일 때)과 '더보기(+20)' / '접기' 버튼으로 나머지를 찾음
+    const LIST_PAGE = 5;
+    const LIST_STEP = 20;
+    const listView = {};
+    function listState(kind) { return listView[kind] || (listView[kind] = { q: '', limit: LIST_PAGE, type: '' }); }
+    function listWindow(kind, listId, items, textOf, placeholder) {
+      const v = listState(kind);
+      const listEl = document.getElementById(listId);
+      let tools = document.getElementById(listId + 'Tools');
+      if (!tools) {
+        tools = document.createElement('div');
+        tools.id = listId + 'Tools';
+        tools.className = 'relative mt-2 mb-2';
+        tools.innerHTML = `<i data-lucide="search" class="w-3.5 h-3.5 text-charcoal-light absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input type="search" data-kind="${kind}" oninput="listSearch(this)" placeholder="${escapeHtml(placeholder)}" autocomplete="off"
+            class="w-full pl-8 pr-3 py-2 rounded-xl bg-ivory-bg border border-ivory-border text-xs text-charcoal placeholder:text-charcoal-light focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/15" />`;
+        listEl.before(tools);
+      }
+      let more = document.getElementById(listId + 'More');
+      if (!more) {
+        more = document.createElement('div');
+        more.id = listId + 'More';
+        more.className = 'mt-2 flex items-center justify-between gap-2 text-[12.5px]';
+        listEl.after(more);
+      }
+      const q = v.q.trim().toLowerCase();
+      const matched = q ? items.filter(x => textOf(x).toLowerCase().includes(q)) : items;
+      const shown = matched.slice(0, v.limit);
+      tools.classList.toggle('hidden', items.length <= LIST_PAGE && !q);
+      const left = matched.length - shown.length;
+      const info = q ? `검색 결과 ${matched.length}건` : (matched.length > LIST_PAGE ? `전체 ${matched.length}건 중 ${shown.length}건` : '');
+      more.innerHTML = (info ? `<span class="text-charcoal-muted">${info}</span>` : '<span></span>') +
+        `<div class="flex items-center gap-1.5">` +
+        (v.limit > LIST_PAGE && shown.length > LIST_PAGE ? `<button type="button" data-kind="${kind}" onclick="listLess(this)" class="px-2.5 py-1 rounded-lg text-charcoal-muted hover:bg-ivory-subtle font-semibold">접기 ▴</button>` : '') +
+        (left > 0 ? `<button type="button" data-kind="${kind}" onclick="listMore(this)" class="px-2.5 py-1 rounded-lg bg-ivory-subtle hover:bg-charcoal hover:text-white text-charcoal font-bold transition-colors">더보기 ▾ (${left}건 더)</button>` : '') +
+        `</div>`;
+      more.classList.toggle('hidden', !info && left <= 0 && !(v.limit > LIST_PAGE && shown.length > LIST_PAGE));
+      return { shown, q };
+    }
+    function listSearch(input) {
+      const v = listState(input.dataset.kind);
+      v.q = input.value; v.limit = LIST_PAGE;
+      refreshKind(input.dataset.kind);
+    }
+    function listMore(btn) { listState(btn.dataset.kind).limit += LIST_STEP; refreshKind(btn.dataset.kind); }
+    function listLess(btn) {
+      listState(btn.dataset.kind).limit = LIST_PAGE;
+      refreshKind(btn.dataset.kind);
+      const card = btn.closest('article');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function listEmpty(q, text) { return emptyRow(q ? '검색 결과가 없습니다.' : text); }
+    function joinText(...a) { return a.filter(Boolean).join(' '); }
+
+    // 매물 장부: 매매·전세·월세 칸을 누르면 그 유형만 보기 (한 번 더 누르면 전체)
+    function setListingType(type) {
+      const v = listState('listings');
+      v.type = v.type === type ? '' : type;
+      v.limit = LIST_PAGE;
+      renderListings();
+    }
+
     function listingType(deal) {
       const d = String(deal || '');
       if (d.includes('매매')) return 'sale';
@@ -2077,8 +2641,18 @@
       document.getElementById('briefing-listings').innerHTML = total
         ? `보유 매물 <strong class="font-bold">${total}건</strong> · 최근 등록 <strong class="font-bold">${escapeHtml(userData.listings[0].title)}</strong>`
         : '등록된 매물이 없습니다';
-      document.getElementById('listingRecentList').innerHTML = userData.listings.length
-        ? userData.listings.map(l => `
+      const lv = listState('listings');
+      [['sale', 'countSale'], ['jeonse', 'countJeonse'], ['monthly', 'countMonthly']].forEach(([t, id]) => {
+        const tile = document.getElementById(id).parentElement;
+        tile.classList.toggle('ring-2', lv.type === t);
+        tile.classList.toggle('ring-brand-orange', lv.type === t);
+        tile.setAttribute('aria-pressed', lv.type === t ? 'true' : 'false');
+      });
+      const pool = lv.type ? userData.listings.filter(l => listingType(l.deal) === lv.type) : userData.listings;
+      const typeName = { sale: '매매', jeonse: '전세', monthly: '월세' }[lv.type];
+      const { shown, q } = listWindow('listings', 'listingRecentList', pool, l => joinText(l.title, l.deal, l.note), '매물 검색 (단지명·동네·거래 조건)');
+      document.getElementById('listingRecentList').innerHTML = shown.length
+        ? shown.map(l => `
           <div class="p-2.5 rounded-2xl bg-ivory-bg border border-ivory-border/60 flex items-center justify-between gap-2">
             <div class="min-w-0">
               <p class="font-bold text-charcoal truncate">${escapeHtml(l.title)}${l.deal ? ' · ' + escapeHtml(l.deal) : ''}</p>
@@ -2086,7 +2660,7 @@
             </div>
             ${itemActions('listings', l.id)}
           </div>`).join('')
-        : emptyRow('등록된 매물이 없습니다. 아래 + 신규 매물 등록을 눌러 추가하세요.');
+        : listEmpty(q, typeName ? `${typeName} 매물이 없습니다. (${typeName} 칸을 한 번 더 누르면 전체 보기)` : '등록된 매물이 없습니다. 아래 + 신규 매물 등록을 눌러 추가하세요.');
     }
 
     function renderTours() {
@@ -2097,8 +2671,9 @@
       document.getElementById('navScheduleCount').textContent = n;
       document.getElementById('briefing-schedule').innerHTML = `금일 투어·미팅 <strong class="text-brand-orange font-bold">${n}건</strong> · ` +
         (next ? `다음 <strong class="font-bold">${escapeHtml(next.time)} ${escapeHtml(next.title)}</strong>` : (n ? '모든 일정 완료 ✅' : '예정된 일정 없음'));
-      document.getElementById('scheduleTimelineList').innerHTML = n
-        ? tours.map(t => {
+      const tw = listWindow('tours', 'scheduleTimelineList', tours, t => joinText(t.time, t.title, t.note), '일정 검색 (고객명·장소)');
+      document.getElementById('scheduleTimelineList').innerHTML = tw.shown.length
+        ? tw.shown.map(t => {
             const isNext = next && t.id === next.id;
             return `
           <label class="flex items-center gap-2.5 p-2.5 rounded-2xl ${isNext ? 'bg-brand-orangeSoft/60 border border-brand-orangeBorder' : 'bg-ivory-bg border border-ivory-border/60'} cursor-pointer">
@@ -2112,7 +2687,7 @@
             ${itemActions('tours', t.id)}
           </label>`;
           }).join('')
-        : emptyRow('예정된 투어·미팅이 없습니다.');
+        : listEmpty(tw.q, '예정된 투어·미팅이 없습니다.');
     }
 
     function renderClients() {
@@ -2126,8 +2701,9 @@
       document.getElementById('clientCountBadge').textContent = `고객 ${n}명`;
       document.getElementById('clientFooterText').textContent =
         `매수·임차 고객 ${n}명` + (touring ? ` · 오늘 투어 ${touring}명` : '') + (noReply ? ` · 미응답 ${noReply}명` : '');
-      document.getElementById('clientLeadsList').innerHTML = userData.clients.length
-        ? userData.clients.map(c => `
+      const cw = listWindow('clients', 'clientLeadsList', userData.clients, c => joinText(c.name, c.cond, c.tag, c.note), '고객 검색 (이름·조건·메모)');
+      document.getElementById('clientLeadsList').innerHTML = cw.shown.length
+        ? cw.shown.map(c => `
           <div class="p-3 rounded-2xl bg-ivory-bg border border-ivory-border/80 space-y-1.5">
             <div class="flex items-start justify-between gap-2">
               <span class="text-xs font-bold text-charcoal min-w-0">${escapeHtml(c.name)}${c.cond ? ` <span class="text-[12.5px] font-normal text-charcoal-muted">· ${escapeHtml(c.cond)}</span>` : ''}</span>
@@ -2141,14 +2717,15 @@
               <button data-id="${escapeHtml(c.id)}" onclick="sendClientCard(this)" class="text-[12.5px] font-bold text-brand-orange hover:underline">→ 추천 매물 카드 발송하기</button>
             </div>
           </div>`).join('')
-        : emptyRow('등록된 고객이 없습니다.');
+        : listEmpty(cw.q, '등록된 고객이 없습니다.');
     }
 
     function renderReminders() {
       const left = userData.reminders.filter(r => !r.done).length;
       document.getElementById('reminderCountBadge').textContent = `${left}건 예정`;
-      document.getElementById('reminderList').innerHTML = userData.reminders.length
-        ? userData.reminders.map(r => `
+      const rw = listWindow('reminders', 'reminderList', userData.reminders, r => joinText(r.text, r.sub), '리마인드 검색');
+      document.getElementById('reminderList').innerHTML = rw.shown.length
+        ? rw.shown.map(r => `
           <label class="flex items-start gap-2.5 p-2.5 rounded-2xl bg-ivory-bg hover:bg-ivory-subtle cursor-pointer transition-colors">
             <input type="checkbox" data-kind="reminders" data-id="${escapeHtml(r.id)}" ${r.done ? 'checked' : ''} onchange="setItemDone(this)" class="mt-0.5 w-3.5 h-3.5 rounded accent-blue-500 cursor-pointer shrink-0" />
             <div class="text-xs leading-snug min-w-0 flex-1">
@@ -2157,7 +2734,7 @@
             </div>
             ${itemActions('reminders', r.id)}
           </label>`).join('')
-        : emptyRow('예정된 리마인드가 없습니다.');
+        : listEmpty(rw.q, '예정된 리마인드가 없습니다.');
     }
 
     // ---------- 계약·잔금 ----------
@@ -2181,8 +2758,9 @@
         nav.classList.add('hidden');
         document.getElementById('briefing-contracts').innerHTML = list.length ? `진행 중 계약 ${list.length}건 · 다가오는 일정 없음` : '진행 중인 계약이 없습니다';
       }
-      document.getElementById('contractList').innerHTML = list.length
-        ? list.map(c => {
+      const kw = listWindow('contracts', 'contractList', list, c => joinText(c.title, c.stage, c.date, c.parties), '계약 검색 (물건·당사자)');
+      document.getElementById('contractList').innerHTML = kw.shown.length
+        ? kw.shown.map(c => {
             const n = daysUntil(parseYmd(c.date));
             const hot = first && c.id === first.id;
             const past = n != null && n < 0;
@@ -2206,7 +2784,7 @@
             ${checks ? `<div class="pt-1.5 border-t ${hot ? 'border-brand-orangeBorder/60' : 'border-ivory-border'} space-y-1.5 text-xs">${checks}</div>` : ''}
           </div>`;
           }).join('')
-        : emptyRow('진행 중인 계약이 없습니다. + 계약 등록을 눌러 추가하세요.');
+        : listEmpty(kw.q, '진행 중인 계약이 없습니다. + 계약 등록을 눌러 추가하세요.');
     }
     function toggleContractCheck(cb) {
       const c = findItem('contracts', cb.dataset.id);
@@ -2250,9 +2828,10 @@
         calm: ['bg-ivory-bg border border-ivory-border/80', 'bg-ivory-subtle text-charcoal-muted'],
         gray: ['bg-ivory-bg border border-ivory-border/80 opacity-70', 'bg-ivory-subtle text-charcoal-muted']
       };
-      document.getElementById('leaseList').innerHTML = list.length
-        ? list.map((l, i) => {
-            const info = infos[i];
+      const lw = listWindow('leases', 'leaseList', list, l => joinText(l.tenant, l.place, l.terms, l.endDate), '임대차 검색 (임차인·주소)');
+      document.getElementById('leaseList').innerHTML = lw.shown.length
+        ? lw.shown.map(l => {
+            const info = leaseInfo(l);
             const [box, chip] = TONE[info.tone];
             const a = `data-id="${escapeHtml(l.id)}"`;
             return `
@@ -2269,7 +2848,7 @@
             </div>
           </div>`;
           }).join('')
-        : emptyRow('관리 중인 임대차가 없습니다. + 임대차 등록을 눌러 추가하세요.');
+        : listEmpty(lw.q, '관리 중인 임대차가 없습니다. + 임대차 등록을 눌러 추가하세요.');
     }
 
 
@@ -2290,8 +2869,9 @@
       document.getElementById('feePaidText').textContent = manwon(t.paid);
       document.getElementById('feePendingText').textContent = manwon(t.pending);
       document.getElementById('briefing-settlement').innerHTML = `이번 달 누적 <strong class="font-bold">${manwon(t.total)}만 원</strong> · 월 목표 <strong class="text-emerald-700 font-bold">${t.rate}%</strong>`;
-      document.getElementById('feeList').innerHTML = userData.fees.length
-        ? userData.fees.map(f => `
+      const fw = listWindow('fees', 'feeList', userData.fees, f => joinText(f.title, f.status === 'paid' ? '입금' : '예정'), '중개보수 검색');
+      document.getElementById('feeList').innerHTML = fw.shown.length
+        ? fw.shown.map(f => `
           <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-ivory-bg border border-ivory-border/70">
             <div class="min-w-0 flex items-center gap-1.5">
               <span class="text-[11.5px] font-bold px-1.5 py-0.5 rounded shrink-0 ${f.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-orangeSoft text-brand-orange'}">${f.status === 'paid' ? '입금' : '예정'}</span>
@@ -2302,7 +2882,7 @@
               ${itemActions('fees', f.id)}
             </div>
           </div>`).join('')
-        : emptyRow('이번 달 중개보수 내역이 없습니다.');
+        : listEmpty(fw.q, '이번 달 중개보수 내역이 없습니다.');
     }
     function editFeeGoal() {
       openFormModal({
@@ -2419,13 +2999,14 @@
       renderLeases();
       renderFees();
       renderReminders();
+      renderRisks();
       renderMarketing();
       renderOverview();
       if (window.lucide) lucide.createIcons();
     }
     function refreshKind(kind) {
       ({ listings: renderListings, tours: renderTours, clients: renderClients, reminders: renderReminders,
-         contracts: renderContracts, leases: renderLeases, fees: renderFees })[kind]();
+         contracts: renderContracts, leases: renderLeases, fees: renderFees, risks: renderRisks })[kind]();
       if (kind === 'tours') renderClients(); // '오늘 투어 N명' 갱신
       renderOverview();
       if (window.lucide) lucide.createIcons();
@@ -2741,7 +3322,8 @@
     }
     function itemEditClick(e, btn) {
       e.preventDefault(); e.stopPropagation();
-      if (FORM_SCHEMAS[btn.dataset.kind]) openItemForm(btn.dataset.kind, btn.dataset.id);
+      if (btn.dataset.kind === 'risks') openRiskModal(btn.dataset.id);
+      else if (FORM_SCHEMAS[btn.dataset.kind]) openItemForm(btn.dataset.kind, btn.dataset.id);
       else openEditModal(btn.dataset.kind, btn.dataset.id);
     }
     function itemDeleteClick(e, btn) {
@@ -3030,7 +3612,8 @@
           reply = `🗓️ <strong>${timeStr} ${escapeHtml(tourTitle)}</strong> 현장 투어 일정을 캘린더에 등록했습니다.`;
         } else if (text.includes('위험') || text.includes('진단')) {
           scrollToCard('card-clauses');
-          reply = `🛡️ <strong>[위험물건 진단]</strong><br/>위험물건 진단 카드에 시세·선순위 채권·보증금을 입력하고 <strong>위험도 즉시 진단 실행</strong>을 눌러 주세요.`;
+          openRiskModal();
+          reply = `🛡️ <strong>[위험물건 정밀 진단]</strong><br/>진단 창을 열었습니다. 시세·보증금·근저당 채권최고액과 선순위 보증금을 입력하면 <strong>경매 시 보증금 회수 예상</strong>과 <strong>HUG 보증 가입 자가점검</strong> 결과가 바로 나옵니다.`;
         } else if (text.includes('만기') || text.includes('갱신') || text.includes('임대차')) {
           scrollToCard('card-lease');
           const leases = userData.leases.slice().sort((a, b) => String(a.endDate).localeCompare(String(b.endDate)));
